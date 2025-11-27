@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "417831327586",
+    "project_id": "auditcloud-45700",
+    "storage_bucket": "auditcloud-45700.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:417831327586:android:c778cbbef76baa5e2ebe3b",
+        "android_client_info": {
+          "package_name": "com.example.audit_cloud_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "417831327586-5654negl342set1e9t3nirf0aco564uk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.audit_cloud_app",
+            "certificate_hash": "0c9e75a1696f7c65e69627cb1e63441f424764a1"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsnoOp1aZCDwssFuGGv0MYQA-s3G681bE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
