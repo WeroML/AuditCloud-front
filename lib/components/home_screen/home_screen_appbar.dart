@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
+import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 
 class HomeScreenAppbar extends StatefulWidget implements PreferredSizeWidget {
   const HomeScreenAppbar({super.key});
@@ -14,6 +16,9 @@ class HomeScreenAppbar extends StatefulWidget implements PreferredSizeWidget {
 class _HomeScreenAppbarState extends State<HomeScreenAppbar> {
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.currentUser;
+
     return AppBar(
       elevation: 0,
       backgroundColor: Color(AppColors.cardBackground),
@@ -52,9 +57,19 @@ class _HomeScreenAppbarState extends State<HomeScreenAppbar> {
           onPressed: () {},
         ),
         const SizedBox(width: 8),*/
-        CircleAvatar(
-          backgroundColor: Color(AppColors.primaryBlue).withOpacity(0.1),
-          child: Icon(Icons.person, color: Color(AppColors.primaryBlue)),
+        GestureDetector(
+          onTap: () {
+            Scaffold.of(context).openEndDrawer();
+          },
+          child: CircleAvatar(
+            backgroundColor: Color(AppColors.primaryBlue).withOpacity(0.1),
+            backgroundImage: user?.photoUrl != null
+                ? NetworkImage(user!.photoUrl!)
+                : null,
+            child: user?.photoUrl == null
+                ? Icon(Icons.person, color: Color(AppColors.primaryBlue))
+                : null,
+          ),
         ),
         const SizedBox(width: 16),
       ],

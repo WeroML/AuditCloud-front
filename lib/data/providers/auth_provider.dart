@@ -36,6 +36,7 @@ class AuthProvider extends ChangeNotifier {
         print(
           '[AuthProvider] Usuario existente encontrado: ${_currentUser!.correo}',
         );
+        print('USUARIO ENCONTRADO: ${_currentUser!.toJson()}');
       } else {
         print('[AuthProvider] No hay sesión activa');
       }
@@ -45,6 +46,26 @@ class AuthProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  /// Realizar login tradicional con usuario y contraseña
+  /// Por ahora es un mock que siempre entra
+  Future<bool> loginWithCredentials(String email, String password) async {
+    print('[AuthProvider] Iniciando loginWithCredentials...');
+    _setLoading(true);
+    await Future.delayed(const Duration(seconds: 1)); // Simular retardo
+
+    // Mock: siempre exitoso
+    final UserModel? user = await _authRepository.signInWithCredentials(
+      email,
+      password,
+    );
+
+    print('[AuthProvider] ✅ Login  local exitoso para: $email');
+    _currentUser = user;
+    notifyListeners();
+    _setLoading(false);
+    return true;
   }
 
   /// Realiza el login con Google Sign-In

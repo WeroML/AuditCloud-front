@@ -24,13 +24,46 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   /// Maneja el login tradicional (usuario y contraseña)
-  /// Por ahora solo navega sin validación
-  void _handleLogin() {
-    // TODO: Implementar validación de login tradicional
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+  Future<void> _handleLogin() async {
+    print('[LoginScreen] Botón de login tradicional presionado');
+
+    // Validar que los campos no estén vacíos
+    if (_usernameController.text.trim().isEmpty ||
+        _passwordController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Por favor completa todos los campos'),
+          backgroundColor: Color(AppColors.statusError),
+        ),
+      );
+      return;
+    }
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    // Llamar al provider para hacer login con credenciales
+    final bool success = await authProvider.loginWithCredentials(
+      _usernameController.text.trim(),
+      _passwordController.text.trim(),
     );
+
+    if (success && mounted) {
+      // Login exitoso, navegar a HomeScreen
+      print('[LoginScreen] Navegando a HomeScreen...');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else if (!success && mounted) {
+      // Mostrar mensaje de error
+      print('[LoginScreen] Mostrando SnackBar de error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Credenciales incorrectas'),
+          backgroundColor: Color(AppColors.statusError),
+        ),
+      );
+    }
   }
 
   /// Maneja el login con Google usando el AuthProvider
@@ -134,9 +167,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 10),
 
-                          // Campo de usuario
+                          // Campo de correo electrónico
                           Text(
-                            'Usuario',
+                            'Correo Electrónico',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -147,13 +180,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextField(
                             controller: _usernameController,
                             enabled: !authProvider.isLoading,
+                            keyboardType: TextInputType.emailAddress,
                             decoration: InputDecoration(
-                              hintText: 'Ingresa tu usuario',
+                              hintText: 'correo@ejemplo.com',
                               hintStyle: TextStyle(
                                 color: Color(AppColors.textLight),
                               ),
                               prefixIcon: Icon(
-                                Icons.person_outline,
+                                Icons.email_outlined,
                                 color: Color(AppColors.primaryGreen),
                               ),
                               filled: true,

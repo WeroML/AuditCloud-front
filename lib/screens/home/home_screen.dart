@@ -4,6 +4,7 @@ import 'package:audit_cloud_app/components/home_screen/audit_status_chart.dart';
 import 'package:audit_cloud_app/components/home_screen/monthly_chart.dart';
 import 'package:audit_cloud_app/components/home_screen/recent_audits_section.dart';
 import 'package:audit_cloud_app/components/home_screen/bottom_navigation_bar.dart';
+import 'package:audit_cloud_app/components/home_screen/profile_drawer.dart';
 import 'package:audit_cloud_app/screens/all_audits/all_audits_screen.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const HomeScreenAppbar(),
+      endDrawer: const ProfileDrawer(),
       backgroundColor: Color(AppColors.backgroundColor),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(

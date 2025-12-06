@@ -5,8 +5,27 @@ import 'package:audit_cloud_app/data/models/user_model.dart';
 /// No depende de Provider ni de la capa de UI
 /// Preparado para integración futura con backend y NFS/HDFS
 class AuthRepository {
+  //Inicio de sesión local al backend y google sign in
+
+  //Local
+  Future<UserModel?> signInWithCredentials(
+    String email,
+    String password,
+  ) async {
+    //Aqui se va a hacer la validación con el backend
+
+    // Mock: retornar un modelo de usuario por ahora
+    return UserModel(
+      idUsuario: 1,
+      nombre: 'Usuario Local',
+      correo: email,
+      rol: 'usuario',
+      authProvider: 'local',
+      activo: true,
+    );
+  }
+
   // Instancia de Google Sign-In
-  // MODIFICACIÓN: Se agregó el clientId manual para corregir el error ApiException: 10
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
 
   /// Realiza el login con Google Sign-In
@@ -33,6 +52,7 @@ class AuthRepository {
 
       // TODO: En el futuro, intercambiar el token de Google por un token del backend
       // final String? backendToken = await exchangeGoogleToken(googleUser.authentication.accessToken);
+      // De ahí, se van a recibir los datos completos del usuario desde el backend/NFS/HDFS
 
       // Crear el modelo de usuario
       // Por ahora, sin idUsuario del backend ni rol asignado
@@ -77,6 +97,7 @@ class AuthRepository {
   /// Útil para verificar sesión al iniciar la app
   Future<UserModel?> getCurrentUser() async {
     try {
+      // Intentar obtener el usuario actualmente autenticado con Google Sign-In
       final GoogleSignInAccount? googleUser = await _googleSignIn
           .signInSilently();
 
