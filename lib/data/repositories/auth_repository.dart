@@ -1,5 +1,6 @@
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:audit_cloud_app/data/models/user_model.dart';
+import 'package:audit_cloud_app/services/api_service.dart';
 
 /// Repository que maneja toda la lógica de autenticación
 /// No depende de Provider ni de la capa de UI
@@ -7,22 +8,47 @@ import 'package:audit_cloud_app/data/models/user_model.dart';
 class AuthRepository {
   //Inicio de sesión local al backend y google sign in
 
-  //Local
+  /// Login tradicional con correo y contraseña
+  /// Llama al endpoint POST /api/auth/login del backend
   Future<UserModel?> signInWithCredentials(
     String email,
     String password,
   ) async {
-    //Aqui se va a hacer la validación con el backend
+    print('[AuthRepository] Iniciando login con credenciales...');
+    print('[AuthRepository] Email: $email');
 
-    // Mock: retornar un modelo de usuario por ahora
-    return UserModel(
-      idUsuario: 1,
-      nombre: 'Usuario Local',
-      correo: email,
-      rol: 'usuario',
-      authProvider: 'local',
-      activo: true,
-    );
+    try {
+      // Llamar al endpoint de login del backend
+      final responseData = await ApiService.login(email, password);
+
+      if (responseData == null) {
+        print('[AuthRepository] ❌ Login falló - respuesta null');
+        return null;
+      }
+
+      print('[AuthRepository] ✅ Login exitoso');
+      print('[AuthRepository] Token guardado en ApiService');
+
+      // Extraer datos del usuario de la respuesta
+      final usuarioData = responseData['usuario'] as Map<String, dynamic>;
+
+      // Crear el UserModel desde la respuesta del backend
+      final user = UserModel(
+        idUsuario: usuarioData['id_usuario'] as int,
+        idEmpresa: usuarioData['id_empresa'] as int?,
+        nombre: usuarioData['nombre'] as String,
+        correo: usuarioData['correo'] as String,
+        idRol: usuarioData['id_rol'] as int?,
+        authProvider: 'local',
+        activo: true,
+      );
+
+      print('[AuthRepository] UserModel creado: ${user.nombre}');
+      return user;
+    } catch (e) {
+      print('[AuthRepository] ❌ Error en login: $e');
+      return null;
+    }
   }
 
   // Instancia de Google Sign-In
@@ -60,12 +86,11 @@ class AuthRepository {
         idUsuario: null, // Se asignará cuando se sincronice con backend
         nombre: displayName,
         correo: email,
-        rol: null, // Se asignará desde backend o NFS
+        idRol: null, // Se asignará desde backend o NFS
         authProvider: 'google',
         activo: true,
         photoUrl: photoUrl,
         googleUserId: googleUserId,
-        backendToken: null, // Se asignará tras intercambio con backend
       );
 
       // TODO: Cargar datos adicionales del usuario desde NFS/HDFS
@@ -86,7 +111,12 @@ class AuthRepository {
   Future<void> signOut() async {
     print('[AuthRepository] Cerrando sesión...');
     try {
+      // Cerrar sesión de Google si está autenticado con Google
       await _googleSignIn.signOut();
+
+      // Eliminar el token JWT del almacenamiento local
+      await ApiService.logout();
+
       print('[AuthRepository] Sesión cerrada exitosamente');
     } catch (error) {
       print('[AuthRepository] ❌ Error al cerrar sesión: $error');
@@ -96,16 +126,34 @@ class AuthRepository {
   /// Verifica si hay un usuario actualmente autenticado
   /// Útil para verificar sesión al iniciar la app
   Future<UserModel?> getCurrentUser() async {
+    print('[AuthRepository] Verificando usuario actual...');
+
     try {
-      // Intentar obtener el usuario actualmente autenticado con Google Sign-In
+      // Verificar si hay un token JWT guardado (login tradicional)
+      final token = await ApiService.getToken();
+      if (token != null) {
+        print('[AuthRepository] Token JWT encontrado');
+        // TODO: Validar el token con el backend y obtener los datos del usuario
+        // Por ahora, retornamos null hasta implementar un endpoint /api/auth/me
+        // que retorne los datos del usuario basado en el token
+        print(
+          '[AuthRepository] TODO: Implementar validación de token con backend',
+        );
+      }
+
+      // Intentar obtener el usuario autenticado con Google Sign-In
       final GoogleSignInAccount? googleUser = await _googleSignIn
           .signInSilently();
 
       if (googleUser == null) {
+        print('[AuthRepository] No hay usuario autenticado');
         return null;
       }
 
-      // Reconstruir el UserModel desde la sesión activa
+      print(
+        '[AuthRepository] Usuario de Google encontrado: ${googleUser.email}',
+      );
+      // Reconstruir el UserModel desde la sesión activa de Google
       return UserModel(
         nombre: googleUser.displayName ?? 'Usuario',
         correo: googleUser.email,
@@ -115,7 +163,7 @@ class AuthRepository {
         googleUserId: googleUser.id,
       );
     } catch (error) {
-      print('Error al obtener usuario actual: $error');
+      print('[AuthRepository] Error al obtener usuario actual: $error');
       return null;
     }
   }

@@ -1,91 +1,101 @@
-/// Modelo de usuario basado en la tabla SQL 'usuarios'
-/// y datos adicionales de Google Sign-In
+/// Modelo de usuario basado en usuarios.json del backend
 class UserModel {
-  // Campos de la tabla SQL
-  final int? idUsuario; // Nullable hasta que se sincronice con backend
+  final int? idUsuario;
+  final int? idEmpresa;
   final String nombre;
   final String correo;
-  final String? rol; // Nullable porque puede no estar asignado al inicio
-  final String authProvider; // 'google', 'local', etc.
+  final String? passwordHash;
+  final int? idRol;
   final bool activo;
+  final DateTime? creadoEn;
 
-  // Campos adicionales de Google
+  // Campos adicionales de Google Sign-In
   final String? photoUrl;
   final String? googleUserId;
-
-  // Token para futuras comunicaciones con backend
-  final String? backendToken;
+  final String? authProvider;
 
   UserModel({
     this.idUsuario,
+    this.idEmpresa,
     required this.nombre,
     required this.correo,
-    this.rol,
-    required this.authProvider,
+    this.passwordHash,
+    this.idRol,
     this.activo = true,
+    this.creadoEn,
     this.photoUrl,
     this.googleUserId,
-    this.backendToken,
+    this.authProvider,
   });
 
   /// Convierte el modelo a JSON para almacenamiento o envío al backend
   Map<String, dynamic> toJson() {
     return {
       'id_usuario': idUsuario,
+      'id_empresa': idEmpresa,
       'nombre': nombre,
       'correo': correo,
-      'rol': rol,
-      'auth_provider': authProvider,
+      'password_hash': passwordHash,
+      'id_rol': idRol,
       'activo': activo,
+      'creado_en': creadoEn?.toIso8601String(),
       'photo_url': photoUrl,
       'google_user_id': googleUserId,
-      'backend_token': backendToken,
+      'auth_provider': authProvider,
     };
   }
 
-  /// Crea una instancia desde JSON (backend, NFS/HDFS, o caché local)
+  /// Crea una instancia desde JSON del backend
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       idUsuario: json['id_usuario'] as int?,
+      idEmpresa: json['id_empresa'] as int?,
       nombre: json['nombre'] as String,
       correo: json['correo'] as String,
-      rol: json['rol'] as String?,
-      authProvider: json['auth_provider'] as String,
+      passwordHash: json['password_hash'] as String?,
+      idRol: json['id_rol'] as int?,
       activo: json['activo'] as bool? ?? true,
+      creadoEn: json['creado_en'] != null
+          ? DateTime.parse(json['creado_en'] as String)
+          : null,
       photoUrl: json['photo_url'] as String?,
       googleUserId: json['google_user_id'] as String?,
-      backendToken: json['backend_token'] as String?,
+      authProvider: json['auth_provider'] as String?,
     );
   }
 
   /// Crea una copia del usuario con campos actualizados
   UserModel copyWith({
     int? idUsuario,
+    int? idEmpresa,
     String? nombre,
     String? correo,
-    String? rol,
-    String? authProvider,
+    String? passwordHash,
+    int? idRol,
     bool? activo,
+    DateTime? creadoEn,
     String? photoUrl,
     String? googleUserId,
-    String? backendToken,
+    String? authProvider,
   }) {
     return UserModel(
       idUsuario: idUsuario ?? this.idUsuario,
+      idEmpresa: idEmpresa ?? this.idEmpresa,
       nombre: nombre ?? this.nombre,
       correo: correo ?? this.correo,
-      rol: rol ?? this.rol,
-      authProvider: authProvider ?? this.authProvider,
+      passwordHash: passwordHash ?? this.passwordHash,
+      idRol: idRol ?? this.idRol,
       activo: activo ?? this.activo,
+      creadoEn: creadoEn ?? this.creadoEn,
       photoUrl: photoUrl ?? this.photoUrl,
       googleUserId: googleUserId ?? this.googleUserId,
-      backendToken: backendToken ?? this.backendToken,
+      authProvider: authProvider ?? this.authProvider,
     );
   }
 
   @override
   String toString() {
     return 'UserModel(idUsuario: $idUsuario, nombre: $nombre, correo: $correo, '
-        'rol: $rol, authProvider: $authProvider, activo: $activo)';
+        'idRol: $idRol, idEmpresa: $idEmpresa, activo: $activo)';
   }
 }

@@ -49,23 +49,35 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Realizar login tradicional con usuario y contraseña
-  /// Por ahora es un mock que siempre entra
+  /// Llama al backend POST /api/auth/login
   Future<bool> loginWithCredentials(String email, String password) async {
     print('[AuthProvider] Iniciando loginWithCredentials...');
     _setLoading(true);
-    await Future.delayed(const Duration(seconds: 1)); // Simular retardo
 
-    // Mock: siempre exitoso
-    final UserModel? user = await _authRepository.signInWithCredentials(
-      email,
-      password,
-    );
+    try {
+      // Llamar al repository para autenticar con el backend
+      final UserModel? user = await _authRepository.signInWithCredentials(
+        email,
+        password,
+      );
 
-    print('[AuthProvider] ✅ Login  local exitoso para: $email');
-    _currentUser = user;
-    notifyListeners();
-    _setLoading(false);
-    return true;
+      if (user != null) {
+        print('[AuthProvider] ✅ Login exitoso para: ${user.correo}');
+        //Imprimir todo el JSON del usuario
+        print('USUARIO LOGEADO: ${user.toJson()}');
+        _currentUser = user;
+        notifyListeners();
+        return true;
+      } else {
+        print('[AuthProvider] ❌ Login falló - credenciales inválidas');
+        return false;
+      }
+    } catch (error) {
+      print('[AuthProvider] ❌ Error en loginWithCredentials: $error');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   /// Realiza el login con Google Sign-In

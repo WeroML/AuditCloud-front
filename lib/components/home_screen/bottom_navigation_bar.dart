@@ -1,5 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
+import 'package:audit_cloud_app/data/providers/auth_provider.dart';
+
+/// Modelo para definir un item del navigation bar
+class NavItem {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final String route; // Para navegación futura
+
+  NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.route,
+  });
+}
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
@@ -11,57 +28,161 @@ class CustomBottomNavigationBar extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Retorna las opciones del navigation bar según el rol del usuario
+  List<NavItem> _getNavItemsForRole(int? idRol) {
+    switch (idRol) {
+      case 1: // SUPERVISOR
+        return [
+          NavItem(
+            icon: Icons.dashboard_outlined,
+            activeIcon: Icons.dashboard,
+            label: 'Dashboard',
+            route: '/dashboard',
+          ),
+          NavItem(
+            icon: Icons.business_outlined,
+            activeIcon: Icons.business,
+            label: 'Empresas',
+            route: '/empresas-cliente',
+          ),
+          NavItem(
+            icon: Icons.assignment_outlined,
+            activeIcon: Icons.assignment,
+            label: 'Auditorías',
+            route: '/auditorias',
+          ),
+          NavItem(
+            icon: Icons.payments_outlined,
+            activeIcon: Icons.payments,
+            label: 'Pagos',
+            route: '/pagos',
+          ),
+        ];
+
+      case 2: // AUDITOR
+        return [
+          NavItem(
+            icon: Icons.dashboard_outlined,
+            activeIcon: Icons.dashboard,
+            label: 'Dashboard',
+            route: '/dashboard',
+          ),
+          NavItem(
+            icon: Icons.assignment_outlined,
+            activeIcon: Icons.assignment,
+            label: 'Mis Auditorías',
+            route: '/mis-auditorias',
+          ),
+          NavItem(
+            icon: Icons.photo_library_outlined,
+            activeIcon: Icons.photo_library,
+            label: 'Evidencias',
+            route: '/evidencias',
+          ),
+          NavItem(
+            icon: Icons.description_outlined,
+            activeIcon: Icons.description,
+            label: 'Reportes',
+            route: '/reportes',
+          ),
+        ];
+
+      case 3: // CLIENTE
+        return [
+          NavItem(
+            icon: Icons.dashboard_outlined,
+            activeIcon: Icons.dashboard,
+            label: 'Dashboard',
+            route: '/dashboard',
+          ),
+          NavItem(
+            icon: Icons.store_outlined,
+            activeIcon: Icons.store,
+            label: 'Empresas',
+            route: '/empresas-auditoras',
+          ),
+          NavItem(
+            icon: Icons.payment_outlined,
+            activeIcon: Icons.payment,
+            label: 'Pagos',
+            route: '/pagos',
+          ),
+          NavItem(
+            icon: Icons.assignment_outlined,
+            activeIcon: Icons.assignment,
+            label: 'Auditorías',
+            route: '/mis-auditorias',
+          ),
+        ];
+
+      default:
+        // Fallback: opciones básicas si no hay rol definido
+        return [
+          NavItem(
+            icon: Icons.dashboard_outlined,
+            activeIcon: Icons.dashboard,
+            label: 'Dashboard',
+            route: '/dashboard',
+          ),
+          NavItem(
+            icon: Icons.assignment_outlined,
+            activeIcon: Icons.assignment,
+            label: 'Auditorías',
+            route: '/auditorias',
+          ),
+        ];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Color(AppColors.cardBackground),
-        boxShadow: [
-          BoxShadow(
-            color: Color(AppColors.shadowColor),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home,
-                label: 'Home',
-                index: 0,
-              ),
-              _buildNavItem(
-                icon: Icons.add_circle_outline,
-                activeIcon: Icons.add_circle,
-                label: 'Nueva Auditoría',
-                index: 1,
-              ),
-              _buildNavItem(
-                icon: Icons.assignment_outlined,
-                activeIcon: Icons.assignment,
-                label: 'Auditorías',
-                index: 2,
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        final user = authProvider.currentUser;
+        final navItems = _getNavItemsForRole(user?.idRol);
+
+        return Container(
+          decoration: BoxDecoration(
+            color: Color(AppColors.cardBackground),
+            boxShadow: [
+              BoxShadow(
+                color: Color(AppColors.shadowColor),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
               ),
             ],
           ),
-        ),
-      ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: List.generate(
+                  navItems.length,
+                  (index) => _buildNavItem(
+                    navItem: navItems[index],
+                    index: index,
+                    totalItems: navItems.length,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildNavItem({
-    required IconData icon,
-    required IconData activeIcon,
-    required String label,
+    required NavItem navItem,
     required int index,
+    required int totalItems,
   }) {
     final isSelected = currentIndex == index;
+
+    // Ajustar tamaño de fuente según cantidad de items
+    final fontSize = totalItems > 3 ? 10.0 : 12.0;
+    final iconSize = totalItems > 3 ? 24.0 : 26.0;
 
     return Expanded(
       child: InkWell(
@@ -79,17 +200,20 @@ class CustomBottomNavigationBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                isSelected ? activeIcon : icon,
+                isSelected ? navItem.activeIcon : navItem.icon,
                 color: isSelected
                     ? Color(AppColors.primaryGreen)
                     : Color(AppColors.textSecondary),
-                size: 26,
+                size: iconSize,
               ),
               const SizedBox(height: 4),
               Text(
-                label,
+                navItem.label,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: fontSize,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   color: isSelected
                       ? Color(AppColors.primaryGreen)
