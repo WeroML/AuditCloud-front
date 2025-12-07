@@ -20,6 +20,10 @@
             "package_name": "com.example.audit_cloud_app",
             "certificate_hash": "0c9e75a1696f7c65e69627cb1e63441f424764a1"
           }
+        },
+        {
+          "client_id": "417831327586-01dvdhj92iao6kgcfpkp20dkiseiv4bq.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
@@ -29,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "417831327586-01dvdhj92iao6kgcfpkp20dkiseiv4bq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

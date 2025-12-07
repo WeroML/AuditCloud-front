@@ -9,10 +9,10 @@ class UserModel {
   final bool activo;
   final DateTime? creadoEn;
 
-  // Campos adicionales de Google Sign-In
+  // Campos de Google Sign-In
   final String? photoUrl;
-  final String? googleUserId;
-  final String? authProvider;
+  final String? googleId; // ID único de Google
+  final bool? loginGoogle; // Indica si se registró con Google
 
   UserModel({
     this.idUsuario,
@@ -24,8 +24,8 @@ class UserModel {
     this.activo = true,
     this.creadoEn,
     this.photoUrl,
-    this.googleUserId,
-    this.authProvider,
+    this.googleId,
+    this.loginGoogle,
   });
 
   /// Convierte el modelo a JSON para almacenamiento o envío al backend
@@ -39,9 +39,9 @@ class UserModel {
       'id_rol': idRol,
       'activo': activo,
       'creado_en': creadoEn?.toIso8601String(),
-      'photo_url': photoUrl,
-      'google_user_id': googleUserId,
-      'auth_provider': authProvider,
+      'foto_url': photoUrl,
+      'google_id': googleId,
+      'login_google': loginGoogle,
     };
   }
 
@@ -58,9 +58,9 @@ class UserModel {
       creadoEn: json['creado_en'] != null
           ? DateTime.parse(json['creado_en'] as String)
           : null,
-      photoUrl: json['photo_url'] as String?,
-      googleUserId: json['google_user_id'] as String?,
-      authProvider: json['auth_provider'] as String?,
+      photoUrl: json['foto_url'] as String?,
+      googleId: json['google_id'] as String?,
+      loginGoogle: json['login_google'] as bool?,
     );
   }
 
@@ -75,8 +75,8 @@ class UserModel {
     bool? activo,
     DateTime? creadoEn,
     String? photoUrl,
-    String? googleUserId,
-    String? authProvider,
+    String? googleId,
+    bool? loginGoogle,
   }) {
     return UserModel(
       idUsuario: idUsuario ?? this.idUsuario,
@@ -88,8 +88,8 @@ class UserModel {
       activo: activo ?? this.activo,
       creadoEn: creadoEn ?? this.creadoEn,
       photoUrl: photoUrl ?? this.photoUrl,
-      googleUserId: googleUserId ?? this.googleUserId,
-      authProvider: authProvider ?? this.authProvider,
+      googleId: googleId ?? this.googleId,
+      loginGoogle: loginGoogle ?? this.loginGoogle,
     );
   }
 

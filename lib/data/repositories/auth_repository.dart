@@ -39,8 +39,8 @@ class AuthRepository {
         nombre: usuarioData['nombre'] as String,
         correo: usuarioData['correo'] as String,
         idRol: usuarioData['id_rol'] as int?,
-        authProvider: 'local',
         activo: true,
+        photoUrl: usuarioData['foto_url'] as String?,
       );
 
       print('[AuthRepository] UserModel creado: ${user.nombre}');
@@ -52,9 +52,14 @@ class AuthRepository {
   }
 
   // Instancia de Google Sign-In
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+  // Web Client ID obtenido de google-services.json (client_type: 3)
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+    serverClientId:
+        '417831327586-01dvdhj92iao6kgcfpkp20dkiseiv4bq.apps.googleusercontent.com',
+  );
 
-  /// Realiza el login con Google Sign-In
+  /// Realiza el login con Google Sign-In y autentica con el backend
   /// Retorna un UserModel si tiene éxito, null si falla o se cancela
   Future<UserModel?> signInWithGoogle() async {
     print('[AuthRepository] Iniciando Google Sign-In...');
@@ -69,35 +74,72 @@ class AuthRepository {
       }
 
       print('[AuthRepository] Usuario de Google obtenido: ${googleUser.email}');
+      print('[AuthRepository] Display Name: ${googleUser.displayName}');
+      print('[AuthRepository] ID: ${googleUser.id}');
+      print('[AuthRepository] Photo URL: ${googleUser.photoUrl}');
 
-      // Obtener datos del usuario de Google
-      final String displayName = googleUser.displayName ?? 'Usuario';
-      final String email = googleUser.email;
-      final String? photoUrl = googleUser.photoUrl;
-      final String googleUserId = googleUser.id;
+      // Obtener la autenticación de Google para obtener el idToken
+      print('[AuthRepository] Obteniendo GoogleSignInAuthentication...');
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
-      // TODO: En el futuro, intercambiar el token de Google por un token del backend
-      // final String? backendToken = await exchangeGoogleToken(googleUser.authentication.accessToken);
-      // De ahí, se van a recibir los datos completos del usuario desde el backend/NFS/HDFS
+      print('[AuthRepository] GoogleSignInAuthentication obtenido');
+      print(
+        '[AuthRepository] accessToken presente: ${googleAuth.accessToken != null}',
+      );
+      print('[AuthRepository] idToken presente: ${googleAuth.idToken != null}');
 
-      // Crear el modelo de usuario
-      // Por ahora, sin idUsuario del backend ni rol asignado
-      final UserModel user = UserModel(
-        idUsuario: null, // Se asignará cuando se sincronice con backend
-        nombre: displayName,
-        correo: email,
-        idRol: null, // Se asignará desde backend o NFS
-        authProvider: 'google',
-        activo: true,
-        photoUrl: photoUrl,
-        googleUserId: googleUserId,
+      if (googleAuth.accessToken != null) {
+        print(
+          '[AuthRepository] accessToken (primeros 20 chars): ${googleAuth.accessToken!.substring(0, 20)}...',
+        );
+      }
+      if (googleAuth.idToken != null) {
+        print(
+          '[AuthRepository] idToken (primeros 20 chars): ${googleAuth.idToken!.substring(0, 20)}...',
+        );
+      }
+
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        print('[AuthRepository] ❌ No se pudo obtener el idToken de Google');
+        print('[AuthRepository] Esto puede deberse a:');
+        print(
+          '[AuthRepository] 1. Falta configurar serverClientId en GoogleSignIn',
+        );
+        print(
+          '[AuthRepository] 2. google-services.json no está configurado correctamente',
+        );
+        print(
+          '[AuthRepository] 3. El proyecto de Firebase no tiene OAuth configurado',
+        );
+        return null;
+      }
+
+      print(
+        '[AuthRepository] idToken obtenido exitosamente, autenticando con backend...',
       );
 
-      // TODO: Cargar datos adicionales del usuario desde NFS/HDFS
-      // final UserModel? completeUser = await loadUserDataFromNFS(email);
-      // if (completeUser != null) return completeUser;
+      // Autenticar con el backend enviando el idToken
+      // Por defecto, el rol es 3 (CLIENTE) si no se especifica
+      final responseData = await ApiService.loginWithGoogle(idToken, rol: 3);
 
-      print('[AuthRepository] UserModel creado exitosamente para: $email');
+      if (responseData == null) {
+        print('[AuthRepository] ❌ Login con Google falló en el backend');
+        return null;
+      }
+
+      print('[AuthRepository] ✅ Login con Google exitoso');
+      print('[AuthRepository] Token guardado en ApiService');
+
+      // Extraer datos del usuario de la respuesta
+      final usuarioData = responseData['usuario'] as Map<String, dynamic>;
+
+      // Crear el UserModel desde la respuesta del backend
+      final user = UserModel.fromJson(usuarioData);
+
+      print('[AuthRepository] UserModel creado: ${user.nombre}');
       return user;
     } catch (error) {
       // Manejar errores de autenticación
@@ -129,39 +171,60 @@ class AuthRepository {
     print('[AuthRepository] Verificando usuario actual...');
 
     try {
-      // Verificar si hay un token JWT guardado (login tradicional)
+      // Verificar si hay un token JWT guardado
       final token = await ApiService.getToken();
       if (token != null) {
         print('[AuthRepository] Token JWT encontrado');
-        // TODO: Validar el token con el backend y obtener los datos del usuario
-        // Por ahora, retornamos null hasta implementar un endpoint /api/auth/me
-        // que retorne los datos del usuario basado en el token
-        print(
-          '[AuthRepository] TODO: Implementar validación de token con backend',
-        );
+        // TODO: Implementar endpoint /api/auth/me en el backend
+        // para validar el token y obtener los datos actualizados del usuario
+        // Por ahora, si hay token, intentamos reautenticar con Google silenciosamente
       }
 
-      // Intentar obtener el usuario autenticado con Google Sign-In
+      // Intentar obtener el usuario autenticado con Google Sign-In silenciosamente
       final GoogleSignInAccount? googleUser = await _googleSignIn
           .signInSilently();
 
       if (googleUser == null) {
-        print('[AuthRepository] No hay usuario autenticado');
+        print('[AuthRepository] No hay usuario autenticado con Google');
+
+        // Si hay token pero no sesión de Google, el usuario se autenticó con credenciales
+        if (token != null) {
+          print(
+            '[AuthRepository] Usuario autenticado con credenciales (token JWT presente)',
+          );
+          // TODO: Obtener datos del usuario desde el backend con el token
+          // Por ahora retornamos null hasta implementar /api/auth/me
+        }
+
         return null;
       }
 
       print(
         '[AuthRepository] Usuario de Google encontrado: ${googleUser.email}',
       );
-      // Reconstruir el UserModel desde la sesión activa de Google
-      return UserModel(
-        nombre: googleUser.displayName ?? 'Usuario',
-        correo: googleUser.email,
-        authProvider: 'google',
-        activo: true,
-        photoUrl: googleUser.photoUrl,
-        googleUserId: googleUser.id,
-      );
+
+      // Obtener el idToken para reautenticar con el backend
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        print(
+          '[AuthRepository] No se pudo obtener idToken de la sesión activa',
+        );
+        return null;
+      }
+
+      // Reautenticar con el backend para obtener datos actualizados
+      final responseData = await ApiService.loginWithGoogle(idToken, rol: 3);
+
+      if (responseData != null && responseData['usuario'] != null) {
+        final usuarioData = responseData['usuario'] as Map<String, dynamic>;
+        return UserModel.fromJson(usuarioData);
+      }
+
+      // Si falla la reautenticación, retornar null
+      return null;
     } catch (error) {
       print('[AuthRepository] Error al obtener usuario actual: $error');
       return null;

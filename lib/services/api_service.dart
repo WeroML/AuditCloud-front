@@ -194,6 +194,39 @@ class ApiService {
     await deleteToken();
   }
 
+  /// Login con Google
+  /// POST /api/auth/google
+  /// Envía el idToken de Google y opcionalmente el rol deseado
+  /// Retorna los datos del usuario y el token JWT del backend
+  static Future<Map<String, dynamic>?> loginWithGoogle(
+    String idToken, {
+    int? rol, // rol opcional: 1=SUPERVISOR, 2=AUDITOR, 3=CLIENTE (default)
+  }) async {
+    try {
+      final body = {'idToken': idToken, if (rol != null) 'rol': rol};
+
+      final response = await post('/auth/google', body, requiresAuth: false);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+        // Guardar el token JWT
+        if (data['token'] != null) {
+          await saveToken(data['token'] as String);
+        }
+
+        return data;
+      } else {
+        print('[ApiService] Login con Google falló: ${response.statusCode}');
+        print('[ApiService] Response: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en loginWithGoogle: $e');
+      return null;
+    }
+  }
+
   // ============================================================================
   // MÉTODOS PARA AUDITOR
   // ============================================================================
