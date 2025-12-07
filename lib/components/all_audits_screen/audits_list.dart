@@ -1,17 +1,99 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/components/home_screen/audit_card.dart';
+import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
 
 class AuditsList extends StatelessWidget {
-  const AuditsList({super.key});
+  final int? userRole;
+
+  const AuditsList({super.key, this.userRole});
 
   @override
   Widget build(BuildContext context) {
+    // Renderizar según el rol del usuario
+    switch (userRole) {
+      case 2: // AUDITOR
+        return _buildAuditorAuditsList(context);
+      case 1: // SUPERVISOR
+        return _buildSupervisorAuditsList(context);
+      case 3: // CLIENTE
+        return _buildClienteAuditsList(context);
+      default:
+        return _buildEmptyList();
+    }
+  }
+
+  // Lista de auditorías para Auditor
+  Widget _buildAuditorAuditsList(BuildContext context) {
+    return Consumer<AuditorProvider>(
+      builder: (context, auditorProvider, child) {
+        final auditorias = auditorProvider.getAuditoriasOrdenadas();
+
+        if (auditorias.isEmpty) {
+          return _buildEmptyState('No tienes auditorías asignadas');
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Ordenadas por fecha (${auditorias.length} auditorías)',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(AppColors.textSecondary),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...auditorias.map((auditoria) {
+              final statusColor = _getStatusColor(auditoria.idEstado);
+              final statusName = auditorProvider.getNombreEstado(
+                auditoria.idEstado,
+              );
+              final fecha = auditoria.fechaInicio ?? auditoria.creadaEn;
+              final dateStr = fecha != null ? _formatDate(fecha) : 'Sin fecha';
+              final progress = _getProgress(auditoria.idEstado);
+              final companyName = auditoria.clienteEmpresa ?? 'Empresa Cliente';
+
+              return AuditCard(
+                auditName: 'Auditoría #${auditoria.idAuditoria}',
+                company: companyName,
+                status: statusName,
+                date: dateStr,
+                progress: progress,
+                statusColor: statusColor,
+              );
+            }),
+          ],
+        );
+      },
+    );
+  }
+
+  // Lista de auditorías para Supervisor (TODO: implementar con SupervisorProvider)
+  Widget _buildSupervisorAuditsList(BuildContext context) {
+    // TODO: Consumir SupervisorProvider cuando esté creado
+    return _buildEmptyState('Funcionalidad de Supervisor en desarrollo');
+  }
+
+  // Lista de auditorías para Cliente (TODO: implementar con ClienteProvider)
+  Widget _buildClienteAuditsList(BuildContext context) {
+    // TODO: Consumir ClienteProvider cuando esté creado
+    return _buildEmptyState('Funcionalidad de Cliente en desarrollo');
+  }
+
+  // Estado vacío
+  Widget _buildEmptyList() {
+    return _buildEmptyState('No hay auditorías disponibles');
+  }
+
+  Widget _buildEmptyState(String message) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Ordenadas por fecha',
+          'Auditorías',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -19,105 +101,74 @@ class AuditsList extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-
-        // Auditorías más recientes primero
-        AuditCard(
-          auditName: 'Auditoría de Residuos',
-          company: 'NatureCorp',
-          status: 'Pendiente',
-          date: '20 Nov 2025',
-          progress: 0.0,
-          statusColor: AppColors.statusPending,
-        ),
-        AuditCard(
-          auditName: 'Auditoría Ambiental - Planta Norte',
-          company: 'EcoTech Industries',
-          status: 'En Progreso',
-          date: '15 Nov 2025',
-          progress: 0.65,
-          statusColor: AppColors.statusInProgress,
-        ),
-        AuditCard(
-          auditName: 'Certificación ISO 14001',
-          company: 'Sustainable Ltd.',
-          status: 'En Progreso',
-          date: '12 Nov 2025',
-          progress: 0.45,
-          statusColor: AppColors.statusInProgress,
-        ),
-        AuditCard(
-          auditName: 'Evaluación de Emisiones',
-          company: 'GreenPower S.A.',
-          status: 'Completada',
-          date: '10 Nov 2025',
-          progress: 1.0,
-          statusColor: AppColors.statusCompleted,
-        ),
-        AuditCard(
-          auditName: 'Auditoría de Agua Residual',
-          company: 'AquaClean Inc.',
-          status: 'Completada',
-          date: '08 Nov 2025',
-          progress: 1.0,
-          statusColor: AppColors.statusCompleted,
-        ),
-        AuditCard(
-          auditName: 'Control de Calidad Ambiental',
-          company: 'EcoTech Industries',
-          status: 'Completada',
-          date: '05 Nov 2025',
-          progress: 1.0,
-          statusColor: AppColors.statusCompleted,
-        ),
-        AuditCard(
-          auditName: 'Evaluación de Impacto Ambiental',
-          company: 'GreenBuilders Co.',
-          status: 'En Progreso',
-          date: '03 Nov 2025',
-          progress: 0.75,
-          statusColor: AppColors.statusInProgress,
-        ),
-        AuditCard(
-          auditName: 'Auditoría Energética',
-          company: 'PowerGreen Ltd.',
-          status: 'Completada',
-          date: '01 Nov 2025',
-          progress: 1.0,
-          statusColor: AppColors.statusCompleted,
-        ),
-        AuditCard(
-          auditName: 'Gestión de Residuos Peligrosos',
-          company: 'SafeWaste Corp.',
-          status: 'En Progreso',
-          date: '28 Oct 2025',
-          progress: 0.30,
-          statusColor: AppColors.statusInProgress,
-        ),
-        AuditCard(
-          auditName: 'Certificación Carbono Neutro',
-          company: 'EcoTech Industries',
-          status: 'Completada',
-          date: '25 Oct 2025',
-          progress: 1.0,
-          statusColor: AppColors.statusCompleted,
-        ),
-        AuditCard(
-          auditName: 'Auditoría de Biodiversidad',
-          company: 'NatureCorp',
-          status: 'Pendiente',
-          date: '22 Oct 2025',
-          progress: 0.0,
-          statusColor: AppColors.statusPending,
-        ),
-        AuditCard(
-          auditName: 'Evaluación de Ruido Ambiental',
-          company: 'SoundControl Inc.',
-          status: 'Completada',
-          date: '20 Oct 2025',
-          progress: 1.0,
-          statusColor: AppColors.statusCompleted,
+        Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: Color(AppColors.cardBackground),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Color(AppColors.shadowColor),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              message,
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(AppColors.textSecondary),
+              ),
+            ),
+          ),
         ),
       ],
     );
+  }
+
+  int _getStatusColor(int idEstado) {
+    switch (idEstado) {
+      case 1: // CREADA
+        return AppColors.statusPending;
+      case 2: // EN_PROCESO
+        return AppColors.statusInProgress;
+      case 3: // FINALIZADA
+        return AppColors.statusCompleted;
+      default:
+        return AppColors.textSecondary;
+    }
+  }
+
+  double _getProgress(int idEstado) {
+    switch (idEstado) {
+      case 1: // CREADA
+        return 0.0;
+      case 2: // EN_PROCESO
+        return 0.5;
+      case 3: // FINALIZADA
+        return 1.0;
+      default:
+        return 0.0;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    final months = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic',
+    ];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 }

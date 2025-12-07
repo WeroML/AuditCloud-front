@@ -3,10 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
 
-class QuickStatsCard extends StatelessWidget {
+class EvidencesStatsCard extends StatelessWidget {
   final int? userRole;
 
-  const QuickStatsCard({super.key, this.userRole});
+  const EvidencesStatsCard({super.key, this.userRole});
 
   @override
   Widget build(BuildContext context) {
@@ -27,16 +27,16 @@ class QuickStatsCard extends StatelessWidget {
   Widget _buildAuditorStats(BuildContext context) {
     return Consumer<AuditorProvider>(
       builder: (context, auditorProvider, child) {
-        final total = auditorProvider.totalAuditorias;
-        final finalizadas = auditorProvider.auditoriasFinalizadas;
-        final enProceso = auditorProvider.auditoriasEnProceso;
-        final creadas = auditorProvider.auditoriasCreadas;
+        final total = auditorProvider.totalEvidencias;
+        final fotos = auditorProvider.evidenciasFoto;
+        final videos = auditorProvider.evidenciasVideo;
+        final documentos = auditorProvider.evidenciasDocumento;
 
         return _buildStatsContainer(
           totalValue: total.toString(),
-          completedValue: finalizadas.toString(),
-          inProgressValue: enProceso.toString(),
-          pendingValue: creadas.toString(),
+          fotosValue: fotos.toString(),
+          videosValue: videos.toString(),
+          documentosValue: documentos.toString(),
         );
       },
     );
@@ -47,9 +47,9 @@ class QuickStatsCard extends StatelessWidget {
     // TODO: Consumir SupervisorProvider cuando esté creado
     return _buildStatsContainer(
       totalValue: '0',
-      completedValue: '0',
-      inProgressValue: '0',
-      pendingValue: '0',
+      fotosValue: '0',
+      videosValue: '0',
+      documentosValue: '0',
     );
   }
 
@@ -58,9 +58,9 @@ class QuickStatsCard extends StatelessWidget {
     // TODO: Consumir ClienteProvider cuando esté creado
     return _buildStatsContainer(
       totalValue: '0',
-      completedValue: '0',
-      inProgressValue: '0',
-      pendingValue: '0',
+      fotosValue: '0',
+      videosValue: '0',
+      documentosValue: '0',
     );
   }
 
@@ -68,18 +68,18 @@ class QuickStatsCard extends StatelessWidget {
   Widget _buildEmptyStats() {
     return _buildStatsContainer(
       totalValue: '-',
-      completedValue: '-',
-      inProgressValue: '-',
-      pendingValue: '-',
+      fotosValue: '-',
+      videosValue: '-',
+      documentosValue: '-',
     );
   }
 
   // Widget contenedor de estadísticas (reutilizable)
   Widget _buildStatsContainer({
     required String totalValue,
-    required String completedValue,
-    required String inProgressValue,
-    required String pendingValue,
+    required String fotosValue,
+    required String videosValue,
+    required String documentosValue,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -99,19 +99,15 @@ class QuickStatsCard extends StatelessWidget {
         children: [
           _buildQuickStat('Total', totalValue, AppColors.primaryBlue),
           _buildDivider(),
-          _buildQuickStat(
-            'Completadas',
-            completedValue,
-            AppColors.statusCompleted,
-          ),
+          _buildQuickStat('Fotos', fotosValue, AppColors.primaryGreen),
+          _buildDivider(),
+          _buildQuickStat('Videos', videosValue, AppColors.statusInProgress),
           _buildDivider(),
           _buildQuickStat(
-            'En Progreso',
-            inProgressValue,
-            AppColors.statusInProgress,
+            'Documentos',
+            documentosValue,
+            AppColors.statusPending,
           ),
-          _buildDivider(),
-          _buildQuickStat('Pendientes', pendingValue, AppColors.statusPending),
         ],
       ),
     );

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
+import 'package:audit_cloud_app/screens/all_audits/all_audits_screen.dart';
+import 'package:audit_cloud_app/screens/evidences/evidences_screen.dart';
 
 /// Modelo para definir un item del navigation bar
 class NavItem {
@@ -160,9 +162,11 @@ class CustomBottomNavigationBar extends StatelessWidget {
                 children: List.generate(
                   navItems.length,
                   (index) => _buildNavItem(
+                    context: context,
                     navItem: navItems[index],
                     index: index,
                     totalItems: navItems.length,
+                    userRole: user?.idRol,
                   ),
                 ),
               ),
@@ -174,9 +178,11 @@ class CustomBottomNavigationBar extends StatelessWidget {
   }
 
   Widget _buildNavItem({
+    required BuildContext context,
     required NavItem navItem,
     required int index,
     required int totalItems,
+    int? userRole,
   }) {
     final isSelected = currentIndex == index;
 
@@ -186,7 +192,32 @@ class CustomBottomNavigationBar extends StatelessWidget {
 
     return Expanded(
       child: InkWell(
-        onTap: () => onTap(index),
+        onTap: () {
+          // Navegación especial para Auditor
+          if (userRole == 2) {
+            if (navItem.route == '/mis-auditorias') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AllAuditsScreen(),
+                ),
+              );
+            } else if (navItem.route == '/evidencias') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const EvidencesScreen(),
+                ),
+              );
+            } else {
+              // Para otros casos, usar el callback original
+              onTap(index);
+            }
+          } else {
+            // Para otros roles, usar el callback original
+            onTap(index);
+          }
+        },
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8),

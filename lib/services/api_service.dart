@@ -224,6 +224,59 @@ class ApiService {
     }
   }
 
+  /// Obtiene las evidencias de un auditor
+  /// GET /api/auditor/evidencias/:idAuditoria
+  /// Si idAuditoria es 0, obtiene todas las evidencias del auditor
+  static Future<List<Map<String, dynamic>>?> getEvidencias(
+    int idAuditoria,
+  ) async {
+    try {
+      final response = await get(
+        '/auditor/evidencias/$idAuditoria',
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List<dynamic>;
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        print(
+          '[ApiService] Error al obtener evidencias: ${response.statusCode}',
+        );
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en getEvidencias: $e');
+      return null;
+    }
+  }
+
+  /// Obtiene el detalle de una auditoría específica
+  /// GET /api/auditor/auditorias/:id
+  static Future<Map<String, dynamic>?> getAuditoriaDetalle(
+    int idAuditoria,
+  ) async {
+    try {
+      final response = await get(
+        '/auditor/auditorias/$idAuditoria',
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return data;
+      } else {
+        print(
+          '[ApiService] Error al obtener detalle de auditoría: ${response.statusCode}',
+        );
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en getAuditoriaDetalle: $e');
+      return null;
+    }
+  }
+
   // ============================================================================
   // MÉTODOS FUTUROS PARA OTRAS ENTIDADES
   // ============================================================================

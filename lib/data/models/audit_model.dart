@@ -10,6 +10,10 @@ class AuditModel {
   final DateTime? creadaEn;
   final DateTime? estadoActualizadoEn;
 
+  // Información del cliente (opcional, viene del backend en algunos endpoints)
+  final String? clienteNombre;
+  final String? clienteEmpresa;
+
   AuditModel({
     this.idAuditoria,
     required this.idEmpresaAuditora,
@@ -20,6 +24,8 @@ class AuditModel {
     this.fechaInicio,
     this.creadaEn,
     this.estadoActualizadoEn,
+    this.clienteNombre,
+    this.clienteEmpresa,
   });
 
   /// Convierte el modelo a JSON
@@ -39,6 +45,16 @@ class AuditModel {
 
   /// Crea una instancia desde JSON del backend
   factory AuditModel.fromJson(Map<String, dynamic> json) {
+    // Extraer información del cliente si está presente
+    String? clienteNombre;
+    String? clienteEmpresa;
+
+    if (json['cliente'] != null && json['cliente'] is Map<String, dynamic>) {
+      final clienteData = json['cliente'] as Map<String, dynamic>;
+      clienteNombre = clienteData['nombre'] as String?;
+      clienteEmpresa = clienteData['nombre_empresa'] as String?;
+    }
+
     return AuditModel(
       idAuditoria: json['id_auditoria'] as int?,
       idEmpresaAuditora: json['id_empresa_auditora'] as int,
@@ -55,6 +71,8 @@ class AuditModel {
       estadoActualizadoEn: json['estado_actualizado_en'] != null
           ? DateTime.parse(json['estado_actualizado_en'] as String)
           : null,
+      clienteNombre: clienteNombre,
+      clienteEmpresa: clienteEmpresa,
     );
   }
 
@@ -69,6 +87,8 @@ class AuditModel {
     DateTime? fechaInicio,
     DateTime? creadaEn,
     DateTime? estadoActualizadoEn,
+    String? clienteNombre,
+    String? clienteEmpresa,
   }) {
     return AuditModel(
       idAuditoria: idAuditoria ?? this.idAuditoria,
@@ -80,6 +100,8 @@ class AuditModel {
       fechaInicio: fechaInicio ?? this.fechaInicio,
       creadaEn: creadaEn ?? this.creadaEn,
       estadoActualizadoEn: estadoActualizadoEn ?? this.estadoActualizadoEn,
+      clienteNombre: clienteNombre ?? this.clienteNombre,
+      clienteEmpresa: clienteEmpresa ?? this.clienteEmpresa,
     );
   }
 

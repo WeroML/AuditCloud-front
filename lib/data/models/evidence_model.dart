@@ -4,11 +4,17 @@ class EvidenceModel {
   final int idAuditoria;
   final int idModulo;
   final int idAuditor; // id_usuario del auditor
-  final String tipo; // "foto", "documento", "nota"
-  final String urlArchivo; // Ruta/URL del archivo almacenado
+  final String tipo; // "FOTO", "VIDEO", "DOC"
+  final String url; // URL del archivo almacenado
+  final String nombreArchivo; // Nombre original del archivo
   final String descripcion;
   final String? ubicacion;
-  final DateTime? subidoEn;
+  final DateTime? creadoEn;
+
+  // Información enriquecida de la auditoría asociada
+  final String? auditoriaClienteNombre;
+  final String? auditoriaEmpresaNombre;
+  final int? auditoriaEstado;
 
   EvidenceModel({
     this.idEvidencia,
@@ -16,10 +22,14 @@ class EvidenceModel {
     required this.idModulo,
     required this.idAuditor,
     required this.tipo,
-    required this.urlArchivo,
+    required this.url,
+    required this.nombreArchivo,
     required this.descripcion,
     this.ubicacion,
-    this.subidoEn,
+    this.creadoEn,
+    this.auditoriaClienteNombre,
+    this.auditoriaEmpresaNombre,
+    this.auditoriaEstado,
   });
 
   /// Convierte el modelo a JSON
@@ -30,10 +40,11 @@ class EvidenceModel {
       'id_modulo': idModulo,
       'id_auditor': idAuditor,
       'tipo': tipo,
-      'url_archivo': urlArchivo,
+      'url': url,
+      'nombre_archivo': nombreArchivo,
       'descripcion': descripcion,
       'ubicacion': ubicacion,
-      'subido_en': subidoEn?.toIso8601String(),
+      'creado_en': creadoEn?.toIso8601String(),
     };
   }
 
@@ -45,11 +56,12 @@ class EvidenceModel {
       idModulo: json['id_modulo'] as int,
       idAuditor: json['id_auditor'] as int,
       tipo: json['tipo'] as String,
-      urlArchivo: json['url_archivo'] as String,
+      url: json['url'] as String,
+      nombreArchivo: json['nombre_archivo'] as String,
       descripcion: json['descripcion'] as String,
       ubicacion: json['ubicacion'] as String?,
-      subidoEn: json['subido_en'] != null
-          ? DateTime.parse(json['subido_en'] as String)
+      creadoEn: json['creado_en'] != null
+          ? DateTime.parse(json['creado_en'] as String)
           : null,
     );
   }
@@ -61,10 +73,14 @@ class EvidenceModel {
     int? idModulo,
     int? idAuditor,
     String? tipo,
-    String? urlArchivo,
+    String? url,
+    String? nombreArchivo,
     String? descripcion,
     String? ubicacion,
-    DateTime? subidoEn,
+    DateTime? creadoEn,
+    String? auditoriaClienteNombre,
+    String? auditoriaEmpresaNombre,
+    int? auditoriaEstado,
   }) {
     return EvidenceModel(
       idEvidencia: idEvidencia ?? this.idEvidencia,
@@ -72,10 +88,16 @@ class EvidenceModel {
       idModulo: idModulo ?? this.idModulo,
       idAuditor: idAuditor ?? this.idAuditor,
       tipo: tipo ?? this.tipo,
-      urlArchivo: urlArchivo ?? this.urlArchivo,
+      url: url ?? this.url,
+      nombreArchivo: nombreArchivo ?? this.nombreArchivo,
       descripcion: descripcion ?? this.descripcion,
       ubicacion: ubicacion ?? this.ubicacion,
-      subidoEn: subidoEn ?? this.subidoEn,
+      creadoEn: creadoEn ?? this.creadoEn,
+      auditoriaClienteNombre:
+          auditoriaClienteNombre ?? this.auditoriaClienteNombre,
+      auditoriaEmpresaNombre:
+          auditoriaEmpresaNombre ?? this.auditoriaEmpresaNombre,
+      auditoriaEstado: auditoriaEstado ?? this.auditoriaEstado,
     );
   }
 
