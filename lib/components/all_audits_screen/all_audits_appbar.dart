@@ -24,21 +24,6 @@ class AllAuditsAppBar extends StatelessWidget implements PreferredSizeWidget {
           color: Color(AppColors.textPrimary),
         ),
       ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.filter_list, color: Color(AppColors.textSecondary)),
-          onPressed: () {
-            // TODO: Implementar filtros
-          },
-        ),
-        IconButton(
-          icon: Icon(Icons.search, color: Color(AppColors.textSecondary)),
-          onPressed: () {
-            // TODO: Implementar búsqueda
-          },
-        ),
-        const SizedBox(width: 8),
-      ],
     );
   }
 }

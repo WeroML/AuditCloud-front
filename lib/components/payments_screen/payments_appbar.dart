@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 
-class ClientCompaniesAppBar extends StatelessWidget
-    implements PreferredSizeWidget {
-  const ClientCompaniesAppBar({super.key});
+class PaymentsAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const PaymentsAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +14,7 @@ class ClientCompaniesAppBar extends StatelessWidget
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        'Empresas Cliente',
+        'Solicitudes de Pago',
         style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,

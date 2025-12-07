@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
+import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
 import 'package:audit_cloud_app/components/evidences_screen/evidence_card.dart';
 
 class EvidencesList extends StatelessWidget {
@@ -74,10 +75,72 @@ class EvidencesList extends StatelessWidget {
     );
   }
 
-  // Lista de evidencias para Supervisor (TODO: implementar con SupervisorProvider)
+  // Lista de evidencias para Supervisor
   Widget _buildSupervisorEvidencesList(BuildContext context) {
-    // TODO: Consumir SupervisorProvider cuando esté creado
-    return _buildEmptyState('Funcionalidad de Supervisor en desarrollo');
+    return Consumer<SupervisorProvider>(
+      builder: (context, supervisorProvider, child) {
+        if (supervisorProvider.isLoadingEvidencias) {
+          return _buildLoadingState();
+        }
+
+        final evidencias = supervisorProvider.getEvidenciasOrdenadas();
+
+        if (evidencias.isEmpty) {
+          return _buildEmptyState('No hay evidencias en las auditorías');
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Ordenadas por fecha (${evidencias.length} evidencias)',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(AppColors.textSecondary),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...evidencias.map((evidenciaMap) {
+              final tipo = evidenciaMap['tipo'] as String? ?? 'DOC';
+              final descripcion =
+                  evidenciaMap['descripcion'] as String? ?? 'Sin descripción';
+              final ubicacion =
+                  evidenciaMap['ubicacion'] as String? ?? 'Sin ubicación';
+              final creadoEn = evidenciaMap['creado_en'] as String?;
+              final nombreAuditor = evidenciaMap['nombre_auditor'] as String?;
+              final nombreModulo = evidenciaMap['nombre_modulo'] as String?;
+
+              final tipoColor = _getTipoColor(tipo);
+              final tipoIcon = _getTipoIcon(tipo);
+
+              String dateStr = 'Sin fecha';
+              if (creadoEn != null) {
+                try {
+                  final fecha = DateTime.parse(creadoEn);
+                  dateStr = _formatDate(fecha);
+                } catch (e) {
+                  dateStr = 'Fecha inválida';
+                }
+              }
+
+              return EvidenceCard(
+                tipo: tipo,
+                descripcion: descripcion,
+                fecha: dateStr,
+                ubicacion: ubicacion,
+                tipoColor: tipoColor,
+                tipoIcon: tipoIcon,
+                auditoriaEmpresa: nombreAuditor ?? 'Auditor desconocido',
+                auditoriaCliente: nombreModulo ?? 'Módulo general',
+                auditoriaEstado:
+                    null, // Las evidencias del supervisor no tienen estado directo
+              );
+            }),
+          ],
+        );
+      },
+    );
   }
 
   // Lista de evidencias para Cliente (TODO: implementar con ClienteProvider)

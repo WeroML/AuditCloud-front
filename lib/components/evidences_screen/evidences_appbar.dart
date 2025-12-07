@@ -24,15 +24,6 @@ class EvidencesAppBar extends StatelessWidget implements PreferredSizeWidget {
           color: Color(AppColors.textPrimary),
         ),
       ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.filter_list, color: Color(AppColors.textPrimary)),
-          onPressed: () {
-            // TODO: Implementar filtros
-            print('[EvidencesAppBar] Mostrar filtros');
-          },
-        ),
-      ],
     );
   }
 }

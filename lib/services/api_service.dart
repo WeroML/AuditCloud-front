@@ -366,6 +366,60 @@ class ApiService {
     }
   }
 
+  /// Obtiene las evidencias de una auditoría específica (para Supervisor)
+  /// GET /api/supervisor/auditorias/:idAuditoria/evidencias
+  static Future<List<Map<String, dynamic>>?> getEvidenciasSupervisor(
+    int idAuditoria,
+  ) async {
+    try {
+      final response = await get(
+        '/supervisor/auditorias/$idAuditoria/evidencias',
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List<dynamic>;
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        print(
+          '[ApiService] Error al obtener evidencias del supervisor: ${response.statusCode}',
+        );
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en getEvidenciasSupervisor: $e');
+      return null;
+    }
+  }
+
+  /// Obtiene los auditores (usuarios internos) de una empresa
+  /// GET /api/supervisor/auditores/:idEmpresa
+  static Future<List<Map<String, dynamic>>?> getAuditoresEmpresa(
+    int idEmpresa,
+  ) async {
+    try {
+      final response = await get(
+        '/supervisor/auditores/$idEmpresa',
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+        // La respuesta viene con estructura: {total, page, limit, data}
+        final data = responseData['data'] as List<dynamic>;
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        print(
+          '[ApiService] Error al obtener auditores: ${response.statusCode}',
+        );
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en getAuditoresEmpresa: $e');
+      return null;
+    }
+  }
+
   // ============================================================================
   // MÉTODOS FUTUROS PARA OTRAS ENTIDADES
   // ============================================================================

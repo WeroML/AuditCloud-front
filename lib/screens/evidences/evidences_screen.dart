@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
+import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
 import 'package:audit_cloud_app/components/evidences_screen/evidences_appbar.dart';
 import 'package:audit_cloud_app/components/evidences_screen/evidences_stats_card.dart';
 import 'package:audit_cloud_app/components/evidences_screen/evidences_list.dart';
@@ -20,7 +21,7 @@ class _EvidencesScreenState extends State<EvidencesScreen> {
     super.initState();
     print('[EvidencesScreen] 📸 initState ejecutado');
 
-    // Cargar evidencias al iniciar la pantalla
+    // Cargar evidencias al iniciar la pantalla según el rol
     WidgetsBinding.instance.addPostFrameCallback((_) {
       print('[EvidencesScreen] 📌 PostFrameCallback ejecutándose...');
 
@@ -28,14 +29,29 @@ class _EvidencesScreenState extends State<EvidencesScreen> {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         final user = authProvider.currentUser;
 
-        if (user != null && user.idRol == 2) {
-          print('[EvidencesScreen] 👤 Usuario Auditor, cargando evidencias...');
-          final auditorProvider = Provider.of<AuditorProvider>(
-            context,
-            listen: false,
-          );
-          // Cargar todas las evidencias del auditor (idAuditoria = 0)
-          auditorProvider.cargarEvidencias(idAuditoria: 0);
+        if (user != null) {
+          if (user.idRol == 2) {
+            // Auditor: cargar evidencias del auditor
+            print(
+              '[EvidencesScreen] 👤 Usuario Auditor, cargando evidencias...',
+            );
+            final auditorProvider = Provider.of<AuditorProvider>(
+              context,
+              listen: false,
+            );
+            // Cargar todas las evidencias del auditor (idAuditoria = 0)
+            auditorProvider.cargarEvidencias(idAuditoria: 0);
+          } else if (user.idRol == 1) {
+            // Supervisor: cargar evidencias de todas las auditorías
+            print(
+              '[EvidencesScreen] 👔 Usuario Supervisor, cargando evidencias...',
+            );
+            final supervisorProvider = Provider.of<SupervisorProvider>(
+              context,
+              listen: false,
+            );
+            supervisorProvider.cargarEvidencias();
+          }
         }
       } catch (e, stackTrace) {
         print('[EvidencesScreen] ❌ ERROR en PostFrameCallback: $e');

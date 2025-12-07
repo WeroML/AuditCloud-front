@@ -17,6 +17,14 @@ class SupervisorProvider extends ChangeNotifier {
   List<AuditModel> _auditorias = [];
   List<AuditModel> get auditorias => _auditorias;
 
+  // Lista de evidencias de todas las auditorías
+  List<Map<String, dynamic>> _evidencias = [];
+  List<Map<String, dynamic>> get evidencias => _evidencias;
+
+  // Lista de usuarios internos (auditores)
+  List<Map<String, dynamic>> _usuariosInternos = [];
+  List<Map<String, dynamic>> get usuariosInternos => _usuariosInternos;
+
   // Estado de carga
   bool _isLoadingEmpresas = false;
   bool get isLoadingEmpresas => _isLoadingEmpresas;
@@ -26,6 +34,12 @@ class SupervisorProvider extends ChangeNotifier {
 
   bool _isLoadingAuditorias = false;
   bool get isLoadingAuditorias => _isLoadingAuditorias;
+
+  bool _isLoadingEvidencias = false;
+  bool get isLoadingEvidencias => _isLoadingEvidencias;
+
+  bool _isLoadingUsuarios = false;
+  bool get isLoadingUsuarios => _isLoadingUsuarios;
 
   // Estado de error
   String? _errorMessage;
@@ -62,6 +76,27 @@ class SupervisorProvider extends ChangeNotifier {
   /// Auditorías finalizadas (estado = 3)
   int get auditoriasFinalizadas =>
       _auditorias.where((a) => a.idEstado == 3).length;
+
+  /// Total de evidencias
+  int get totalEvidencias => _evidencias.length;
+
+  /// Evidencias de tipo FOTO
+  int get evidenciasFoto =>
+      _evidencias.where((e) => e['tipo'] == 'FOTO').length;
+
+  /// Evidencias de tipo VIDEO
+  int get evidenciasVideo =>
+      _evidencias.where((e) => e['tipo'] == 'VIDEO').length;
+
+  /// Evidencias de tipo DOC
+  int get evidenciasDoc => _evidencias.where((e) => e['tipo'] == 'DOC').length;
+
+  /// Total de usuarios internos
+  int get totalUsuariosInternos => _usuariosInternos.length;
+
+  /// Usuarios activos (activo = true)
+  int get usuariosActivos =>
+      _usuariosInternos.where((u) => u['activo'] == true).length;
 
   // ============================================================================
   // MÉTODOS PRINCIPALES - EMPRESAS CLIENTES
@@ -240,6 +275,102 @@ class SupervisorProvider extends ChangeNotifier {
   }
 
   // ============================================================================
+  // MÉTODOS PRINCIPALES - EVIDENCIAS
+  // ============================================================================
+
+  /// Carga las evidencias de todas las auditorías del supervisor
+  /// GET /api/supervisor/auditorias/:idAuditoria/evidencias (para cada auditoría)
+  Future<void> cargarEvidencias() async {
+    print('[SupervisorProvider] 🔄 Iniciando carga de evidencias...');
+
+    _isLoadingEvidencias = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      // Recopilar evidencias de todas las auditorías
+      List<Map<String, dynamic>> todasLasEvidencias = [];
+
+      for (final auditoria in _auditorias) {
+        final idAuditoria = auditoria.idAuditoria;
+        if (idAuditoria == null) continue;
+
+        print(
+          '[SupervisorProvider] 📡 Cargando evidencias de auditoría $idAuditoria...',
+        );
+        final evidenciasData = await ApiService.getEvidenciasSupervisor(
+          idAuditoria,
+        );
+
+        if (evidenciasData != null) {
+          todasLasEvidencias.addAll(evidenciasData);
+        }
+      }
+
+      _evidencias = todasLasEvidencias;
+      print('[SupervisorProvider] ✅ ${_evidencias.length} evidencias cargadas');
+      print(
+        '[SupervisorProvider] 📊 Fotos: $evidenciasFoto, Videos: $evidenciasVideo, Docs: $evidenciasDoc',
+      );
+    } catch (error, stackTrace) {
+      _errorMessage = 'Error de conexión: $error';
+      print('[SupervisorProvider] ❌ EXCEPCIÓN CAPTURADA: $error');
+      print('[SupervisorProvider] 📍 Stack trace: $stackTrace');
+    } finally {
+      print('[SupervisorProvider] ⏹️ Finalizando carga de evidencias');
+      _isLoadingEvidencias = false;
+      notifyListeners();
+    }
+  }
+
+  // ============================================================================
+  // MÉTODOS PRINCIPALES - USUARIOS INTERNOS
+  // ============================================================================
+
+  /// Carga los usuarios internos (auditores) de la empresa del supervisor
+  /// GET /api/supervisor/auditores/:idEmpresa
+  Future<void> cargarUsuariosInternos(int idEmpresa) async {
+    print(
+      '[SupervisorProvider] 🔄 Iniciando carga de usuarios internos para empresa: $idEmpresa',
+    );
+
+    _isLoadingUsuarios = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      print(
+        '[SupervisorProvider] 📡 Llamando a ApiService.getAuditoresEmpresa...',
+      );
+      final usuariosData = await ApiService.getAuditoresEmpresa(idEmpresa);
+      print(
+        '[SupervisorProvider] 📥 Respuesta recibida: ${usuariosData != null ? "Datos OK" : "NULL"}',
+      );
+
+      if (usuariosData != null) {
+        _usuariosInternos = usuariosData;
+        print(
+          '[SupervisorProvider] ✅ ${_usuariosInternos.length} usuarios internos cargados',
+        );
+        print(
+          '[SupervisorProvider] 📊 Activos: $usuariosActivos / Total: $totalUsuariosInternos',
+        );
+      } else {
+        _errorMessage = 'No se pudieron cargar los usuarios internos';
+        print('[SupervisorProvider] ❌ Error: respuesta NULL del backend');
+      }
+    } catch (error, stackTrace) {
+      _errorMessage = 'Error de conexión: $error';
+      print('[SupervisorProvider] ❌ EXCEPCIÓN CAPTURADA: $error');
+      print('[SupervisorProvider] 📍 Stack trace: $stackTrace');
+    } finally {
+      print('[SupervisorProvider] ⏹️ Finalizando carga de usuarios internos');
+      _isLoadingUsuarios = false;
+      notifyListeners();
+    }
+  }
+
+  // ============================================================================
   // MÉTODOS AUXILIARES
   // ============================================================================
 
@@ -259,6 +390,51 @@ class SupervisorProvider extends ChangeNotifier {
   Future<void> refrescarAuditorias(int idEmpresa, {int? idEstado}) async {
     print('[SupervisorProvider] Refrescando auditorías...');
     await cargarAuditorias(idEmpresa, idEstado: idEstado);
+  }
+
+  /// Refresca las evidencias
+  Future<void> refrescarEvidencias() async {
+    print('[SupervisorProvider] Refrescando evidencias...');
+    await cargarEvidencias();
+  }
+
+  /// Refresca los usuarios internos
+  Future<void> refrescarUsuariosInternos(int idEmpresa) async {
+    print('[SupervisorProvider] Refrescando usuarios internos...');
+    await cargarUsuariosInternos(idEmpresa);
+  }
+
+  /// Obtiene usuarios ordenados por nombre
+  List<Map<String, dynamic>> getUsuariosOrdenados() {
+    final lista = List<Map<String, dynamic>>.from(_usuariosInternos);
+    lista.sort((a, b) {
+      final nombreA = a['nombre'] as String? ?? '';
+      final nombreB = b['nombre'] as String? ?? '';
+      return nombreA.compareTo(nombreB);
+    });
+    return lista;
+  }
+
+  /// Obtiene evidencias ordenadas por fecha de creación (más recientes primero)
+  List<Map<String, dynamic>> getEvidenciasOrdenadas() {
+    final lista = List<Map<String, dynamic>>.from(_evidencias);
+    lista.sort((a, b) {
+      final fechaA = a['creado_en'] as String?;
+      final fechaB = b['creado_en'] as String?;
+
+      if (fechaA == null && fechaB == null) return 0;
+      if (fechaA == null) return 1;
+      if (fechaB == null) return -1;
+
+      try {
+        final dateA = DateTime.parse(fechaA);
+        final dateB = DateTime.parse(fechaB);
+        return dateB.compareTo(dateA);
+      } catch (e) {
+        return 0;
+      }
+    });
+    return lista;
   }
 
   /// Obtiene auditorías ordenadas por fecha de creación (más recientes primero)
@@ -300,10 +476,14 @@ class SupervisorProvider extends ChangeNotifier {
     _empresasClientes = [];
     _solicitudesPago = [];
     _auditorias = [];
+    _evidencias = [];
+    _usuariosInternos = [];
     _errorMessage = null;
     _isLoadingEmpresas = false;
     _isLoadingSolicitudes = false;
     _isLoadingAuditorias = false;
+    _isLoadingEvidencias = false;
+    _isLoadingUsuarios = false;
     notifyListeners();
   }
 

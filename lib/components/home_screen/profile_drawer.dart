@@ -6,6 +6,8 @@ import 'package:audit_cloud_app/screens/login/login_screen.dart';
 import 'package:audit_cloud_app/screens/all_audits/all_audits_screen.dart';
 import 'package:audit_cloud_app/screens/evidences/evidences_screen.dart';
 import 'package:audit_cloud_app/screens/client_companies/client_companies_screen.dart';
+import 'package:audit_cloud_app/screens/payments/payments_screen.dart';
+import 'package:audit_cloud_app/screens/internal_users/internal_users_screen.dart';
 
 /// Modelo para definir un item del drawer
 class DrawerMenuItem {
@@ -282,6 +284,38 @@ class ProfileDrawer extends StatelessWidget {
                                   MaterialPageRoute(
                                     builder: (context) =>
                                         const ClientCompaniesScreen(),
+                                  ),
+                                );
+                              } else if (item.route == '/auditorias') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AllAuditsScreen(),
+                                  ),
+                                );
+                              } else if (item.route == '/pagos') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const PaymentsScreen(),
+                                  ),
+                                );
+                              } else if (item.route == '/evidencias') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const EvidencesScreen(),
+                                  ),
+                                );
+                              } else if (item.route == '/usuarios-internos') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const InternalUsersScreen(),
                                   ),
                                 );
                               } else {

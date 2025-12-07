@@ -5,6 +5,8 @@ import 'package:audit_cloud_app/components/all_audits_screen/all_audits_appbar.d
 import 'package:audit_cloud_app/components/all_audits_screen/quick_stats_card.dart';
 import 'package:audit_cloud_app/components/all_audits_screen/audits_list.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
+import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
+import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
 
 class AllAuditsScreen extends StatefulWidget {
   const AllAuditsScreen({super.key});
@@ -14,6 +16,34 @@ class AllAuditsScreen extends StatefulWidget {
 }
 
 class _AllAuditsScreenState extends State<AllAuditsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Recargar auditorías al entrar a la pantalla según el rol
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final user = authProvider.currentUser;
+
+      if (user != null) {
+        if (user.idRol == 2 && user.idUsuario != null) {
+          // Auditor: recargar auditorías asignadas
+          final auditorProvider = Provider.of<AuditorProvider>(
+            context,
+            listen: false,
+          );
+          auditorProvider.cargarAuditoriasAsignadas(user.idUsuario!);
+        } else if (user.idRol == 1 && user.idEmpresa != null) {
+          // Supervisor: recargar auditorías de la empresa
+          final supervisorProvider = Provider.of<SupervisorProvider>(
+            context,
+            listen: false,
+          );
+          supervisorProvider.refrescarAuditorias(user.idEmpresa!);
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(

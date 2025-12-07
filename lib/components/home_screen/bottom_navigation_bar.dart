@@ -5,6 +5,7 @@ import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/screens/all_audits/all_audits_screen.dart';
 import 'package:audit_cloud_app/screens/evidences/evidences_screen.dart';
 import 'package:audit_cloud_app/screens/client_companies/client_companies_screen.dart';
+import 'package:audit_cloud_app/screens/payments/payments_screen.dart';
 
 /// Modelo para definir un item del navigation bar
 class NavItem {
@@ -222,6 +223,18 @@ class CustomBottomNavigationBar extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => const ClientCompaniesScreen(),
                 ),
+              );
+            } else if (navItem.route == '/auditorias') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AllAuditsScreen(),
+                ),
+              );
+            } else if (navItem.route == '/pagos') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PaymentsScreen()),
               );
             } else {
               // Para otros casos, usar el callback original

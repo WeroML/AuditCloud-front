@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/components/client_companies_screen/client_companies_appbar.dart';
 import 'package:audit_cloud_app/components/client_companies_screen/client_companies_stats.dart';
 import 'package:audit_cloud_app/components/client_companies_screen/client_companies_list.dart';
+import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
 
 class ClientCompaniesScreen extends StatefulWidget {
   const ClientCompaniesScreen({super.key});
@@ -12,6 +14,19 @@ class ClientCompaniesScreen extends StatefulWidget {
 }
 
 class _ClientCompaniesScreenState extends State<ClientCompaniesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Recargar empresas clientes al entrar a la pantalla
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final supervisorProvider = Provider.of<SupervisorProvider>(
+        context,
+        listen: false,
+      );
+      supervisorProvider.refrescarEmpresasClientes();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
