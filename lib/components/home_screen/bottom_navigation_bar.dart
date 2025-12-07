@@ -6,6 +6,7 @@ import 'package:audit_cloud_app/screens/all_audits/all_audits_screen.dart';
 import 'package:audit_cloud_app/screens/evidences/evidences_screen.dart';
 import 'package:audit_cloud_app/screens/client_companies/client_companies_screen.dart';
 import 'package:audit_cloud_app/screens/payments/payments_screen.dart';
+import 'package:audit_cloud_app/screens/audit_companies/audit_companies_screen.dart';
 
 /// Modelo para definir un item del navigation bar
 class NavItem {
@@ -235,6 +236,31 @@ class CustomBottomNavigationBar extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const PaymentsScreen()),
+              );
+            } else {
+              // Para otros casos, usar el callback original
+              onTap(index);
+            }
+          } else if (userRole == 3) {
+            // Navegación especial para Cliente
+            if (navItem.route == '/empresas-auditoras') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AuditCompaniesScreen(),
+                ),
+              );
+            } else if (navItem.route == '/pagos') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PaymentsScreen()),
+              );
+            } else if (navItem.route == '/mis-auditorias') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AllAuditsScreen(),
+                ),
               );
             } else {
               // Para otros casos, usar el callback original

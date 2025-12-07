@@ -1,17 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
+import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
+import 'package:audit_cloud_app/data/providers/client_provider.dart';
 
 class PaymentsList extends StatelessWidget {
   const PaymentsList({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        final userRole = authProvider.currentUser?.idRol;
+
+        if (userRole == 1) {
+          return _buildSupervisorList(context);
+        } else if (userRole == 3) {
+          return _buildClienteList(context);
+        } else {
+          return _buildEmptyState();
+        }
+      },
+    );
+  }
+
+  Widget _buildSupervisorList(BuildContext context) {
     return Consumer<SupervisorProvider>(
       builder: (context, supervisorProvider, child) {
-        final solicitudes = supervisorProvider.solicitudesPago;
-
         if (supervisorProvider.isLoadingSolicitudes) {
           return const Center(
             child: Padding(
@@ -21,26 +37,55 @@ class PaymentsList extends StatelessWidget {
           );
         }
 
+        final solicitudes = supervisorProvider.solicitudesPago;
+
         if (solicitudes.isEmpty) {
           return _buildEmptyState();
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Solicitudes de Pago (${solicitudes.length})',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(AppColors.textPrimary),
-              ),
-            ),
-            const SizedBox(height: 12),
-            ...solicitudes.map((solicitud) => _buildPaymentCard(solicitud)),
-          ],
-        );
+        return _buildListContainer(solicitudes);
       },
+    );
+  }
+
+  Widget _buildClienteList(BuildContext context) {
+    return Consumer<ClienteProvider>(
+      builder: (context, clienteProvider, child) {
+        if (clienteProvider.isLoadingSolicitudes) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(40.0),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        final solicitudes = clienteProvider.solicitudesPago;
+
+        if (solicitudes.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        return _buildListContainer(solicitudes);
+      },
+    );
+  }
+
+  Widget _buildListContainer(List<Map<String, dynamic>> solicitudes) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Solicitudes de Pago (${solicitudes.length})',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Color(AppColors.textPrimary),
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...solicitudes.map((solicitud) => _buildPaymentCard(solicitud)),
+      ],
     );
   }
 
@@ -91,17 +136,20 @@ class PaymentsList extends StatelessWidget {
   }
 
   Widget _buildPaymentCard(Map<String, dynamic> solicitud) {
+    print("Solicitud de pago: $solicitud");
     // Extraer datos de la solicitud
     final idSolicitud = solicitud['id_solicitud'] ?? 0;
     final monto = solicitud['monto'] ?? 0.0;
-    final status = solicitud['status'] ?? 'pendiente';
-    final fechaSolicitud = solicitud['fecha_solicitud'] ?? '';
-    final clienteNombre = solicitud['cliente_nombre'] ?? 'Cliente';
-    final auditoriaId = solicitud['id_auditoria'] ?? 0;
+    final concepto = solicitud['concepto'] ?? 'Sin concepto';
+    final idEstado = solicitud['id_estado'] ?? 1;
+    final creadoEn = solicitud['creado_en'] ?? '';
+    final pagadaEn = solicitud['pagada_en'];
+    final paypalOrderId = solicitud['paypal_order_id'] ?? '';
+    final idEmpresaCliente = solicitud['id_empresa_cliente'] ?? 0;
 
-    // Determinar color del status
-    final statusColor = _getStatusColor(status);
-    final statusText = _getStatusText(status);
+    // Determinar color del estado
+    final statusColor = _getStatusColorByEstado(idEstado);
+    final statusText = _getStatusTextByEstado(idEstado);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -177,9 +225,9 @@ class PaymentsList extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: _buildInfoRow(
-                  icon: Icons.assignment,
-                  label: 'Auditoría',
-                  value: '#$auditoriaId',
+                  icon: Icons.business,
+                  label: 'Cliente',
+                  value: 'ID: $idEmpresaCliente',
                 ),
               ),
             ],
@@ -189,21 +237,45 @@ class PaymentsList extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildInfoRow(
-                  icon: Icons.business,
-                  label: 'Cliente',
-                  value: clienteNombre,
+                  icon: Icons.description,
+                  label: 'Concepto',
+                  value: concepto,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: _buildInfoRow(
                   icon: Icons.calendar_today,
-                  label: 'Fecha',
-                  value: _formatFecha(fechaSolicitud),
+                  label: 'Creado',
+                  value: _formatFecha(creadoEn),
                 ),
               ),
             ],
           ),
+          if (pagadaEn != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildInfoRow(
+                    icon: Icons.payment,
+                    label: 'Pagado',
+                    value: _formatFecha(pagadaEn),
+                  ),
+                ),
+                if (paypalOrderId.isNotEmpty) ...[
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildInfoRow(
+                      icon: Icons.confirmation_number,
+                      label: 'PayPal Order',
+                      value: paypalOrderId,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -245,29 +317,29 @@ class PaymentsList extends StatelessWidget {
     );
   }
 
-  int _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pendiente':
+  int _getStatusColorByEstado(int idEstado) {
+    switch (idEstado) {
+      case 1: // Pendiente
         return AppColors.statusPending;
-      case 'aprobada':
+      case 2: // Aprobada/Pagada
         return AppColors.statusCompleted;
-      case 'rechazada':
+      case 3: // Rechazada
         return AppColors.statusError;
       default:
         return AppColors.textSecondary;
     }
   }
 
-  String _getStatusText(String status) {
-    switch (status.toLowerCase()) {
-      case 'pendiente':
+  String _getStatusTextByEstado(int idEstado) {
+    switch (idEstado) {
+      case 1:
         return 'Pendiente';
-      case 'aprobada':
-        return 'Aprobada';
-      case 'rechazada':
+      case 2:
+        return 'Pagada';
+      case 3:
         return 'Rechazada';
       default:
-        return status;
+        return 'Desconocido';
     }
   }
 

@@ -7,6 +7,7 @@ import 'package:audit_cloud_app/components/all_audits_screen/audits_list.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
 import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
+import 'package:audit_cloud_app/data/providers/client_provider.dart';
 
 class AllAuditsScreen extends StatefulWidget {
   const AllAuditsScreen({super.key});
@@ -39,6 +40,13 @@ class _AllAuditsScreenState extends State<AllAuditsScreen> {
             listen: false,
           );
           supervisorProvider.refrescarAuditorias(user.idEmpresa!);
+        } else if (user.idRol == 3 && user.idUsuario != null) {
+          // Cliente: recargar auditorías del cliente
+          final clienteProvider = Provider.of<ClienteProvider>(
+            context,
+            listen: false,
+          );
+          clienteProvider.refrescarAuditorias(user.idUsuario!);
         }
       }
     });

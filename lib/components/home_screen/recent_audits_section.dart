@@ -6,6 +6,7 @@ import 'package:audit_cloud_app/screens/all_audits/all_audits_screen.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
 import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
+import 'package:audit_cloud_app/data/providers/client_provider.dart';
 
 class RecentAuditsSection extends StatelessWidget {
   const RecentAuditsSection({super.key});
@@ -21,6 +22,8 @@ class RecentAuditsSection extends StatelessWidget {
           return _buildAuditorSection(context);
         } else if (userRole == 1) {
           return _buildSupervisorSection(context);
+        } else if (userRole == 3) {
+          return _buildClienteSection(context);
         } else {
           return _buildEmptySection();
         }
@@ -52,6 +55,19 @@ class RecentAuditsSection extends StatelessWidget {
     );
   }
 
+  Widget _buildClienteSection(BuildContext context) {
+    return Consumer<ClienteProvider>(
+      builder: (context, clienteProvider, child) {
+        return _buildSectionContainer(
+          context: context,
+          auditorias: clienteProvider.getAuditoriasOrdenadas(),
+          getNombreEstado: clienteProvider.getNombreEstado,
+          isClienteView: true,
+        );
+      },
+    );
+  }
+
   Widget _buildEmptySection() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -72,6 +88,7 @@ class RecentAuditsSection extends StatelessWidget {
     required BuildContext context,
     required List auditorias,
     required String Function(int) getNombreEstado,
+    bool isClienteView = false,
   }) {
     // Obtener las auditorías más recientes (hasta 4)
     final recentAudits = auditorias.take(4).toList();
@@ -150,8 +167,10 @@ class RecentAuditsSection extends StatelessWidget {
             // Calcular progreso basado en estado
             final progress = _getProgress(auditoria.idEstado);
 
-            // Obtener nombre de empresa (usar clienteEmpresa del backend o fallback)
-            final companyName = auditoria.clienteEmpresa ?? 'Empresa Cliente';
+            // Obtener nombre de empresa según el tipo de vista
+            final companyName = isClienteView
+                ? (auditoria.empresaAuditoraNombre ?? 'Empresa Auditora')
+                : (auditoria.clienteEmpresa ?? 'Empresa Cliente');
 
             return AuditCard(
               auditName: 'Auditoría #${auditoria.idAuditoria}',

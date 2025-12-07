@@ -11,6 +11,7 @@ class ClientCompaniesList extends StatelessWidget {
     return Consumer<SupervisorProvider>(
       builder: (context, supervisorProvider, child) {
         final empresas = supervisorProvider.empresasClientes;
+        print("Empresas cliente: $empresas");
 
         if (supervisorProvider.isLoadingEmpresas) {
           return const Center(
@@ -91,14 +92,18 @@ class ClientCompaniesList extends StatelessWidget {
   }
 
   Widget _buildCompanyCard(Map<String, dynamic> empresa) {
-    // Extraer datos de la empresa
-    final idEmpresa = empresa['id_empresa_cliente'];
-    final nombreEmpresa = empresa['nombre_empresa'] ?? 'Empresa sin nombre';
+    // Extraer datos de la empresa desde el backend
+    final idEmpresa = empresa['id_empresa'];
+    final nombreEmpresa = empresa['nombre'] ?? 'Empresa sin nombre';
+    final ciudad = empresa['ciudad'] ?? '';
+    final pais = empresa['pais'] ?? '';
+    final contacto = empresa['contacto'] ?? '';
     final totalAuditorias = empresa['total_auditorias'] ?? 0;
+    final activo = empresa['activo'] ?? false;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
         color: Color(AppColors.cardBackground),
         borderRadius: BorderRadius.circular(16),
@@ -111,73 +116,159 @@ class ClientCompaniesList extends StatelessWidget {
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Icono de empresa
+          // Icono de empresa (fijo, centrado)
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: Color(AppColors.primaryBlue).withOpacity(0.1),
+              color: Color(AppColors.primaryBlue).withOpacity(0.08),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              Icons.business,
-              color: Color(AppColors.primaryBlue),
-              size: 28,
+            child: Center(
+              child: Icon(
+                Icons.business,
+                color: Color(AppColors.primaryBlue),
+                size: 26,
+              ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
 
           // Información de la empresa
           Expanded(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   nombreEmpresa,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
                     color: Color(AppColors.textPrimary),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 14,
+                      color: Color(AppColors.textSecondary),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '$ciudad, $pais',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(AppColors.textSecondary),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.person_outline,
+                      size: 14,
+                      color: Color(AppColors.textSecondary),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        contacto,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(AppColors.textSecondary),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
                 Text(
                   'ID: $idEmpresa',
                   style: TextStyle(
-                    fontSize: 12,
-                    color: Color(AppColors.textSecondary),
+                    fontSize: 11,
+                    color: Color(AppColors.textSecondary).withOpacity(0.75),
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 12),
 
-          // Badge de auditorías
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Color(AppColors.primaryGreen).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.assignment,
-                  color: Color(AppColors.primaryGreen),
-                  size: 16,
+          // Columna derecha: Badge de estado + Badge de auditorías
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Badge de auditorías
+              Container(
+                width: 60,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: Color(AppColors.primaryGreen).withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  '$totalAuditorias',
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.assignment,
+                      color: Color(AppColors.primaryGreen),
+                      size: 18,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '$totalAuditorias',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(AppColors.primaryGreen),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 10),
+              // Badge de estado activo
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: activo
+                      ? Color(AppColors.statusCompleted).withOpacity(0.12)
+                      : Color(AppColors.statusError).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  activo ? 'Activo' : 'Inactivo',
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Color(AppColors.primaryGreen),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: activo
+                        ? Color(AppColors.statusCompleted)
+                        : Color(AppColors.statusError),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

@@ -6,6 +6,7 @@ import 'package:audit_cloud_app/components/payments_screen/payments_stats.dart';
 import 'package:audit_cloud_app/components/payments_screen/payments_list.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
+import 'package:audit_cloud_app/data/providers/client_provider.dart';
 
 class PaymentsScreen extends StatefulWidget {
   const PaymentsScreen({super.key});
@@ -23,12 +24,22 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final user = authProvider.currentUser;
 
-      if (user != null && user.idEmpresa != null) {
-        final supervisorProvider = Provider.of<SupervisorProvider>(
-          context,
-          listen: false,
-        );
-        supervisorProvider.refrescarSolicitudesPago(user.idEmpresa!);
+      if (user != null) {
+        if (user.idRol == 1 && user.idEmpresa != null) {
+          // Supervisor
+          final supervisorProvider = Provider.of<SupervisorProvider>(
+            context,
+            listen: false,
+          );
+          supervisorProvider.refrescarSolicitudesPago(user.idEmpresa!);
+        } else if (user.idRol == 3 && user.idUsuario != null) {
+          // Cliente
+          final clienteProvider = Provider.of<ClienteProvider>(
+            context,
+            listen: false,
+          );
+          clienteProvider.refrescarSolicitudesPago(user.idUsuario!);
+        }
       }
     });
   }

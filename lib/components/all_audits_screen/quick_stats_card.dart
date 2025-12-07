@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
 import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
+import 'package:audit_cloud_app/data/providers/client_provider.dart';
 
 class QuickStatsCard extends StatelessWidget {
   final int? userRole;
@@ -62,14 +63,22 @@ class QuickStatsCard extends StatelessWidget {
     );
   }
 
-  // Estadísticas para Cliente (TODO: usar ClienteProvider)
+  // Estadísticas para Cliente (usa ClienteProvider)
   Widget _buildClienteStats(BuildContext context) {
-    // TODO: Consumir ClienteProvider cuando esté creado
-    return _buildStatsContainer(
-      totalValue: '0',
-      completedValue: '0',
-      inProgressValue: '0',
-      pendingValue: '0',
+    return Consumer<ClienteProvider>(
+      builder: (context, clienteProvider, child) {
+        final total = clienteProvider.totalAuditorias;
+        final finalizadas = clienteProvider.auditoriasFinalizadas;
+        final enProceso = clienteProvider.auditoriasEnProceso;
+        final creadas = clienteProvider.auditoriasCreadas;
+
+        return _buildStatsContainer(
+          totalValue: total.toString(),
+          completedValue: finalizadas.toString(),
+          inProgressValue: enProceso.toString(),
+          pendingValue: creadas.toString(),
+        );
+      },
     );
   }
 

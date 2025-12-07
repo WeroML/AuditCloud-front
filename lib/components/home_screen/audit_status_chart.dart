@@ -5,6 +5,7 @@ import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
 import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
+import 'package:audit_cloud_app/data/providers/client_provider.dart';
 
 class AuditStatusChart extends StatelessWidget {
   const AuditStatusChart({super.key});
@@ -20,6 +21,8 @@ class AuditStatusChart extends StatelessWidget {
           return _buildAuditorChart(context);
         } else if (userRole == 1) {
           return _buildSupervisorChart(context);
+        } else if (userRole == 3) {
+          return _buildClienteChart(context);
         } else {
           return _buildEmptyChart();
         }
@@ -54,6 +57,25 @@ class AuditStatusChart extends StatelessWidget {
         final enProceso = supervisorProvider.auditoriasEnProceso;
         final finalizadas = supervisorProvider.auditoriasFinalizadas;
         final total = supervisorProvider.totalAuditorias;
+
+        return _buildChartContainer(
+          creadas: creadas,
+          enProceso: enProceso,
+          finalizadas: finalizadas,
+          total: total,
+        );
+      },
+    );
+  }
+
+  Widget _buildClienteChart(BuildContext context) {
+    return Consumer<ClienteProvider>(
+      builder: (context, clienteProvider, child) {
+        // Obtener estadísticas del provider
+        final creadas = clienteProvider.auditoriasCreadas;
+        final enProceso = clienteProvider.auditoriasEnProceso;
+        final finalizadas = clienteProvider.auditoriasFinalizadas;
+        final total = clienteProvider.totalAuditorias;
 
         return _buildChartContainer(
           creadas: creadas,

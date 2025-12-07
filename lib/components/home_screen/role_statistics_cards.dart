@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
 import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
+import 'package:audit_cloud_app/data/providers/client_provider.dart';
 import 'package:audit_cloud_app/components/home_screen/statistics_overview_card.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 
@@ -152,27 +153,33 @@ class RoleStatisticsCards extends StatelessWidget {
   // CLIENTE CARDS
   // ============================================================================
   Widget _buildClienteCards(BuildContext context) {
-    // TODO: Integrar con ClienteProvider cuando esté creado
-    return Row(
-      children: [
-        Expanded(
-          child: StatisticsOverviewCard(
-            title: 'Auditorías Activas',
-            value: '3', // TODO: Obtener de ClienteProvider
-            icon: Icons.assignment_turned_in,
-            color: AppColors.statusInProgress,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: StatisticsOverviewCard(
-            title: 'Pagos Pendientes',
-            value: '2', // TODO: Obtener de ClienteProvider
-            icon: Icons.pending,
-            color: AppColors.statusPending,
-          ),
-        ),
-      ],
+    return Consumer<ClienteProvider>(
+      builder: (context, clienteProvider, child) {
+        final auditoriasActivas = clienteProvider.auditoriasActivas;
+        final pagosPendientes = clienteProvider.solicitudesPagoPendientes;
+
+        return Row(
+          children: [
+            Expanded(
+              child: StatisticsOverviewCard(
+                title: 'Auditorías Activas',
+                value: auditoriasActivas.toString(),
+                icon: Icons.assignment_turned_in,
+                color: AppColors.statusInProgress,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: StatisticsOverviewCard(
+                title: 'Pagos Pendientes',
+                value: pagosPendientes.toString(),
+                icon: Icons.pending,
+                color: AppColors.statusPending,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

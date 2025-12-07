@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
+import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
 
 class EvidencesStatsCard extends StatelessWidget {
   final int? userRole;
@@ -42,14 +43,22 @@ class EvidencesStatsCard extends StatelessWidget {
     );
   }
 
-  // Estadísticas para Supervisor (TODO: usar SupervisorProvider)
+  // Estadísticas para Supervisor (usa SupervisorProvider)
   Widget _buildSupervisorStats(BuildContext context) {
-    // TODO: Consumir SupervisorProvider cuando esté creado
-    return _buildStatsContainer(
-      totalValue: '0',
-      fotosValue: '0',
-      videosValue: '0',
-      documentosValue: '0',
+    return Consumer<SupervisorProvider>(
+      builder: (context, supervisorProvider, child) {
+        final total = supervisorProvider.totalEvidencias;
+        final fotos = supervisorProvider.evidenciasFoto;
+        final videos = supervisorProvider.evidenciasVideo;
+        final documentos = supervisorProvider.evidenciasDoc;
+
+        return _buildStatsContainer(
+          totalValue: total.toString(),
+          fotosValue: fotos.toString(),
+          videosValue: videos.toString(),
+          documentosValue: documentos.toString(),
+        );
+      },
     );
   }
 

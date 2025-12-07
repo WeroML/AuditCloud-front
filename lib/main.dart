@@ -6,6 +6,7 @@ import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
 import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
+import 'package:audit_cloud_app/data/providers/client_provider.dart';
 import 'package:audit_cloud_app/firebase_options.dart';
 
 void main() async {
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => AuditorProvider()),
         ChangeNotifierProvider(create: (_) => SupervisorProvider()),
-        // TODO: Agregar ClienteProvider
+        ChangeNotifierProvider(create: (_) => ClienteProvider()),
       ],
       child: MaterialApp(
         title: 'Audit Cloud App',

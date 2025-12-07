@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
 import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
+import 'package:audit_cloud_app/data/providers/client_provider.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 
 class MonthlyChart extends StatelessWidget {
@@ -20,6 +21,8 @@ class MonthlyChart extends StatelessWidget {
           return _buildAuditorChart();
         } else if (userRole == 1) {
           return _buildSupervisorChart();
+        } else if (userRole == 3) {
+          return _buildClienteChart();
         } else {
           return _buildEmptyChart();
         }
@@ -41,6 +44,14 @@ class MonthlyChart extends StatelessWidget {
     return Consumer<SupervisorProvider>(
       builder: (context, supervisorProvider, child) {
         return _buildChartContainer(auditorias: supervisorProvider.auditorias);
+      },
+    );
+  }
+
+  Widget _buildClienteChart() {
+    return Consumer<ClienteProvider>(
+      builder: (context, clienteProvider, child) {
+        return _buildChartContainer(auditorias: clienteProvider.auditorias);
       },
     );
   }

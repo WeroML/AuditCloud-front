@@ -10,9 +10,12 @@ class AuditModel {
   final DateTime? creadaEn;
   final DateTime? estadoActualizadoEn;
 
-  // Información del cliente (opcional, viene del backend en algunos endpoints)
+  // Información del cliente (opcional, viene del backend para Auditor/Supervisor)
   final String? clienteNombre;
   final String? clienteEmpresa;
+
+  // Información de la empresa auditora (opcional, viene del backend para Cliente)
+  final String? empresaAuditoraNombre;
 
   AuditModel({
     this.idAuditoria,
@@ -26,6 +29,7 @@ class AuditModel {
     this.estadoActualizadoEn,
     this.clienteNombre,
     this.clienteEmpresa,
+    this.empresaAuditoraNombre,
   });
 
   /// Convierte el modelo a JSON
@@ -45,7 +49,7 @@ class AuditModel {
 
   /// Crea una instancia desde JSON del backend
   factory AuditModel.fromJson(Map<String, dynamic> json) {
-    // Extraer información del cliente si está presente
+    // Extraer información del cliente si está presente (para Auditor/Supervisor)
     String? clienteNombre;
     String? clienteEmpresa;
 
@@ -53,6 +57,14 @@ class AuditModel {
       final clienteData = json['cliente'] as Map<String, dynamic>;
       clienteNombre = clienteData['nombre'] as String?;
       clienteEmpresa = clienteData['nombre_empresa'] as String?;
+    }
+
+    // Extraer información de empresa auditora si está presente (para Cliente)
+    String? empresaAuditoraNombre;
+    if (json['empresa_auditora'] != null &&
+        json['empresa_auditora'] is Map<String, dynamic>) {
+      final empresaData = json['empresa_auditora'] as Map<String, dynamic>;
+      empresaAuditoraNombre = empresaData['nombre'] as String?;
     }
 
     return AuditModel(
@@ -73,6 +85,7 @@ class AuditModel {
           : null,
       clienteNombre: clienteNombre,
       clienteEmpresa: clienteEmpresa,
+      empresaAuditoraNombre: empresaAuditoraNombre,
     );
   }
 
@@ -89,6 +102,7 @@ class AuditModel {
     DateTime? estadoActualizadoEn,
     String? clienteNombre,
     String? clienteEmpresa,
+    String? empresaAuditoraNombre,
   }) {
     return AuditModel(
       idAuditoria: idAuditoria ?? this.idAuditoria,
@@ -102,6 +116,8 @@ class AuditModel {
       estadoActualizadoEn: estadoActualizadoEn ?? this.estadoActualizadoEn,
       clienteNombre: clienteNombre ?? this.clienteNombre,
       clienteEmpresa: clienteEmpresa ?? this.clienteEmpresa,
+      empresaAuditoraNombre:
+          empresaAuditoraNombre ?? this.empresaAuditoraNombre,
     );
   }
 

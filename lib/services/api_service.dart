@@ -421,6 +421,113 @@ class ApiService {
   }
 
   // ============================================================================
+  // MÉTODOS PARA CLIENTE
+  // ============================================================================
+
+  /// Obtiene las auditorías de un cliente
+  /// GET /api/cliente/auditorias/:idCliente
+  static Future<List<Map<String, dynamic>>?> getAuditoriasCliente(
+    int idCliente,
+  ) async {
+    try {
+      final response = await get(
+        '/cliente/auditorias/$idCliente',
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+        // La respuesta viene con estructura: {total, page, limit, data}
+        final data = responseData['data'] as List<dynamic>;
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        print(
+          '[ApiService] Error al obtener auditorías del cliente: ${response.statusCode}',
+        );
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en getAuditoriasCliente: $e');
+      return null;
+    }
+  }
+
+  /// Obtiene las solicitudes de pago de un cliente
+  /// GET /api/cliente/solicitudes-pago/:idCliente
+  static Future<List<Map<String, dynamic>>?> getSolicitudesPagoCliente(
+    int idCliente,
+  ) async {
+    try {
+      final response = await get(
+        '/cliente/solicitudes-pago/$idCliente',
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List<dynamic>;
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        print(
+          '[ApiService] Error al obtener solicitudes de pago del cliente: ${response.statusCode}',
+        );
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en getSolicitudesPagoCliente: $e');
+      return null;
+    }
+  }
+
+  /// Obtiene las empresas auditoras disponibles (para Cliente)
+  /// GET /api/cliente/empresas-auditoras
+  static Future<List<Map<String, dynamic>>?> getEmpresasAuditoras() async {
+    try {
+      final response = await get(
+        '/cliente/empresas-auditoras',
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List<dynamic>;
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        print(
+          '[ApiService] Error al obtener empresas auditoras: ${response.statusCode}',
+        );
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en getEmpresasAuditoras: $e');
+      return null;
+    }
+  }
+
+  /// Obtiene el detalle de una empresa auditora específica (para Cliente)
+  /// GET /api/cliente/empresas-auditoras/:id
+  static Future<Map<String, dynamic>?> getDetalleEmpresaAuditora(
+    int idEmpresa,
+  ) async {
+    try {
+      final response = await get(
+        '/cliente/empresas-auditoras/$idEmpresa',
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      } else {
+        print(
+          '[ApiService] Error al obtener detalle de empresa: ${response.statusCode}',
+        );
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en getDetalleEmpresaAuditora: $e');
+      return null;
+    }
+  }
+
+  // ============================================================================
   // MÉTODOS FUTUROS PARA OTRAS ENTIDADES
   // ============================================================================
 
