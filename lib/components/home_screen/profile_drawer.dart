@@ -5,6 +5,7 @@ import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/screens/login/login_screen.dart';
 import 'package:audit_cloud_app/screens/all_audits/all_audits_screen.dart';
 import 'package:audit_cloud_app/screens/evidences/evidences_screen.dart';
+import 'package:audit_cloud_app/screens/client_companies/client_companies_screen.dart';
 
 /// Modelo para definir un item del drawer
 class DrawerMenuItem {
@@ -273,6 +274,22 @@ class ProfileDrawer extends StatelessWidget {
                                   '[ProfileDrawer] Navegar a: ${item.route}',
                                 );
                               }
+                            } else if (user?.idRol == 1) {
+                              // Navegación especial para Supervisor
+                              if (item.route == '/empresas-cliente') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ClientCompaniesScreen(),
+                                  ),
+                                );
+                              } else {
+                                // TODO: Implementar navegación para otras opciones
+                                print(
+                                  '[ProfileDrawer] Navegar a: ${item.route}',
+                                );
+                              }
                             } else {
                               // TODO: Implementar navegación a item.route para otros roles
                               print('[ProfileDrawer] Navegar a: ${item.route}');
@@ -280,7 +297,8 @@ class ProfileDrawer extends StatelessWidget {
                           },
                         ),
                       ),
-                      const Divider(height: 32),
+                      //const Divider(height: 32),
+                      /*
                       _buildDrawerItem(
                         context: context,
                         icon: Icons.settings_outlined,
@@ -300,7 +318,7 @@ class ProfileDrawer extends StatelessWidget {
                           Navigator.pop(context);
                           // TODO: Navegar a ayuda
                         },
-                      ),
+                      ),*/
                     ],
                   ),
                 ),

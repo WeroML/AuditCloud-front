@@ -3,113 +3,166 @@ import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/components/home_screen/audit_card.dart';
 import 'package:audit_cloud_app/screens/all_audits/all_audits_screen.dart';
+import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
+import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
 
 class RecentAuditsSection extends StatelessWidget {
   const RecentAuditsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        final userRole = authProvider.currentUser?.idRol;
+
+        // Mostrar sección según el rol
+        if (userRole == 2) {
+          return _buildAuditorSection(context);
+        } else if (userRole == 1) {
+          return _buildSupervisorSection(context);
+        } else {
+          return _buildEmptySection();
+        }
+      },
+    );
+  }
+
+  Widget _buildAuditorSection(BuildContext context) {
     return Consumer<AuditorProvider>(
       builder: (context, auditorProvider, child) {
-        // Obtener las auditorías más recientes (hasta 4)
-        final auditorias = auditorProvider.getAuditoriasOrdenadas();
-        final recentAudits = auditorias.take(4).toList();
+        return _buildSectionContainer(
+          context: context,
+          auditorias: auditorProvider.getAuditoriasOrdenadas(),
+          getNombreEstado: auditorProvider.getNombreEstado,
+        );
+      },
+    );
+  }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildSupervisorSection(BuildContext context) {
+    return Consumer<SupervisorProvider>(
+      builder: (context, supervisorProvider, child) {
+        return _buildSectionContainer(
+          context: context,
+          auditorias: supervisorProvider.getAuditoriasOrdenadas(),
+          getNombreEstado: supervisorProvider.getNombreEstado,
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptySection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Color(AppColors.cardBackground),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Center(
+        child: Text(
+          'No hay datos disponibles',
+          style: TextStyle(fontSize: 14, color: Color(AppColors.textSecondary)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionContainer({
+    required BuildContext context,
+    required List auditorias,
+    required String Function(int) getNombreEstado,
+  }) {
+    // Obtener las auditorías más recientes (hasta 4)
+    final recentAudits = auditorias.take(4).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Auditorías Recientes',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(AppColors.textPrimary),
+            Text(
+              'Auditorías Recientes',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(AppColors.textPrimary),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AllAuditsScreen(),
                   ),
+                );
+              },
+              child: Text(
+                'Ver todas',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(AppColors.primaryBlue),
+                  fontWeight: FontWeight.w600,
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AllAuditsScreen(),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    'Ver todas',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Color(AppColors.primaryBlue),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Mostrar auditorías reales o mensaje de "sin datos"
+        if (recentAudits.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Color(AppColors.cardBackground),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(AppColors.shadowColor),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-
-            // Mostrar auditorías reales o mensaje de "sin datos"
-            if (recentAudits.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Color(AppColors.cardBackground),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(AppColors.shadowColor),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+            child: Center(
+              child: Text(
+                'No hay auditorías asignadas',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(AppColors.textSecondary),
                 ),
-                child: Center(
-                  child: Text(
-                    'No hay auditorías asignadas',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Color(AppColors.textSecondary),
-                    ),
-                  ),
-                ),
-              )
-            else
-              ...recentAudits.map((auditoria) {
-                // Mapear estado a color y nombre
-                final statusColor = _getStatusColor(auditoria.idEstado);
-                final statusName = auditorProvider.getNombreEstado(
-                  auditoria.idEstado,
-                );
+              ),
+            ),
+          )
+        else
+          ...recentAudits.map((auditoria) {
+            // Mapear estado a color y nombre
+            final statusColor = _getStatusColor(auditoria.idEstado);
+            final statusName = getNombreEstado(auditoria.idEstado);
 
-                // Formatear fecha (usar fecha_inicio o creada_en como fallback)
-                final fecha = auditoria.fechaInicio ?? auditoria.creadaEn;
-                final dateStr = fecha != null
-                    ? _formatDate(fecha)
-                    : 'Sin fecha';
+            // Formatear fecha (usar fecha_inicio o creada_en como fallback)
+            final fecha = auditoria.fechaInicio ?? auditoria.creadaEn;
+            final dateStr = fecha != null ? _formatDate(fecha) : 'Sin fecha';
 
-                // Calcular progreso basado en estado
-                final progress = _getProgress(auditoria.idEstado);
+            // Calcular progreso basado en estado
+            final progress = _getProgress(auditoria.idEstado);
 
-                // Obtener nombre de empresa (usar clienteEmpresa del backend o fallback)
-                final companyName =
-                    auditoria.clienteEmpresa ?? 'Empresa Cliente';
+            // Obtener nombre de empresa (usar clienteEmpresa del backend o fallback)
+            final companyName = auditoria.clienteEmpresa ?? 'Empresa Cliente';
 
-                return AuditCard(
-                  auditName: 'Auditoría #${auditoria.idAuditoria}',
-                  company: companyName,
-                  status: statusName,
-                  date: dateStr,
-                  progress: progress,
-                  statusColor: statusColor,
-                );
-              }),
-          ],
-        );
-      },
+            return AuditCard(
+              auditName: 'Auditoría #${auditoria.idAuditoria}',
+              company: companyName,
+              status: statusName,
+              date: dateStr,
+              progress: progress,
+              statusColor: statusColor,
+            );
+          }),
+      ],
     );
   }
 

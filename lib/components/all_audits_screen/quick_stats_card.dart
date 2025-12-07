@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
+import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
 
 class QuickStatsCard extends StatelessWidget {
   final int? userRole;
@@ -42,14 +43,22 @@ class QuickStatsCard extends StatelessWidget {
     );
   }
 
-  // Estadísticas para Supervisor (TODO: usar SupervisorProvider)
+  // Estadísticas para Supervisor (usa SupervisorProvider)
   Widget _buildSupervisorStats(BuildContext context) {
-    // TODO: Consumir SupervisorProvider cuando esté creado
-    return _buildStatsContainer(
-      totalValue: '0',
-      completedValue: '0',
-      inProgressValue: '0',
-      pendingValue: '0',
+    return Consumer<SupervisorProvider>(
+      builder: (context, supervisorProvider, child) {
+        final total = supervisorProvider.totalAuditorias;
+        final finalizadas = supervisorProvider.auditoriasFinalizadas;
+        final enProceso = supervisorProvider.auditoriasEnProceso;
+        final creadas = supervisorProvider.auditoriasCreadas;
+
+        return _buildStatsContainer(
+          totalValue: total.toString(),
+          completedValue: finalizadas.toString(),
+          inProgressValue: enProceso.toString(),
+          pendingValue: creadas.toString(),
+        );
+      },
     );
   }
 

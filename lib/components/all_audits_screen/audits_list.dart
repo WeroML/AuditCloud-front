@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/components/home_screen/audit_card.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
+import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
 
 class AuditsList extends StatelessWidget {
   final int? userRole;
@@ -71,10 +72,51 @@ class AuditsList extends StatelessWidget {
     );
   }
 
-  // Lista de auditorías para Supervisor (TODO: implementar con SupervisorProvider)
+  // Lista de auditorías para Supervisor (usa SupervisorProvider)
   Widget _buildSupervisorAuditsList(BuildContext context) {
-    // TODO: Consumir SupervisorProvider cuando esté creado
-    return _buildEmptyState('Funcionalidad de Supervisor en desarrollo');
+    return Consumer<SupervisorProvider>(
+      builder: (context, supervisorProvider, child) {
+        final auditorias = supervisorProvider.getAuditoriasOrdenadas();
+
+        if (auditorias.isEmpty) {
+          return _buildEmptyState('No hay auditorías registradas');
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Ordenadas por fecha (${auditorias.length} auditorías)',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(AppColors.textSecondary),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...auditorias.map((auditoria) {
+              final statusColor = _getStatusColor(auditoria.idEstado);
+              final statusName = supervisorProvider.getNombreEstado(
+                auditoria.idEstado,
+              );
+              final fecha = auditoria.fechaInicio ?? auditoria.creadaEn;
+              final dateStr = fecha != null ? _formatDate(fecha) : 'Sin fecha';
+              final progress = _getProgress(auditoria.idEstado);
+              final companyName = auditoria.clienteEmpresa ?? 'Empresa Cliente';
+
+              return AuditCard(
+                auditName: 'Auditoría #${auditoria.idAuditoria}',
+                company: companyName,
+                status: statusName,
+                date: dateStr,
+                progress: progress,
+                statusColor: statusColor,
+              );
+            }),
+          ],
+        );
+      },
+    );
   }
 
   // Lista de auditorías para Cliente (TODO: implementar con ClienteProvider)

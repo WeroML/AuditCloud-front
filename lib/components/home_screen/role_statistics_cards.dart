@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
+import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
 import 'package:audit_cloud_app/components/home_screen/statistics_overview_card.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 
@@ -40,47 +41,54 @@ class RoleStatisticsCards extends StatelessWidget {
   // SUPERVISOR CARDS
   // ============================================================================
   Widget _buildSupervisorCards(BuildContext context) {
-    // TODO: Integrar con SupervisorProvider cuando esté creado
-    return Column(
-      children: [
-        Row(
+    return Consumer<SupervisorProvider>(
+      builder: (context, supervisorProvider, child) {
+        final totalEmpresas = supervisorProvider.totalEmpresasClientes;
+        final solicitudesPago = supervisorProvider.totalSolicitudesPago;
+        final auditoriasActivas = supervisorProvider.auditoriasActivas;
+
+        return Column(
           children: [
-            Expanded(
-              child: StatisticsOverviewCard(
-                title: 'Empresas Cliente',
-                value: '12', // TODO: Obtener de SupervisorProvider
-                icon: Icons.business,
-                color: AppColors.primaryBlue,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: StatisticsOverviewCard(
+                    title: 'Empresas Cliente',
+                    value: totalEmpresas.toString(),
+                    icon: Icons.business,
+                    color: AppColors.primaryBlue,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: StatisticsOverviewCard(
+                    title: 'Solicitudes Pago',
+                    value: solicitudesPago.toString(),
+                    icon: Icons.payment,
+                    color: AppColors.statusPending,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: StatisticsOverviewCard(
-                title: 'Solicitudes Pago',
-                value: '5', // TODO: Obtener de SupervisorProvider
-                icon: Icons.payment,
-                color: AppColors.statusPending,
-              ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: StatisticsOverviewCard(
+                    title: 'Auditorías Activas',
+                    value: auditoriasActivas.toString(),
+                    icon: Icons.assignment,
+                    color: AppColors.statusInProgress,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Espacio vacío para mantener simetría (3 tarjetas)
+                const Expanded(child: SizedBox.shrink()),
+              ],
             ),
           ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: StatisticsOverviewCard(
-                title: 'Auditorías Activas',
-                value: '8', // TODO: Obtener de SupervisorProvider
-                icon: Icons.assignment,
-                color: AppColors.statusInProgress,
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Espacio vacío para mantener simetría (3 tarjetas)
-            const Expanded(child: SizedBox.shrink()),
-          ],
-        ),
-      ],
+        );
+      },
     );
   }
 

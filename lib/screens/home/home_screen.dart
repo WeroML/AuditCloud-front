@@ -9,6 +9,7 @@ import 'package:audit_cloud_app/screens/all_audits/all_audits_screen.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/data/providers/auditor_provider.dart';
+import 'package:audit_cloud_app/data/providers/supervisor_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -55,7 +56,25 @@ class _HomeScreenState extends State<HomeScreen> {
             );
             auditorProvider.cargarAuditoriasAsignadas(user.idUsuario!);
           }
-          // TODO: Agregar carga de datos para Supervisor (id_rol=1)
+          // Si el usuario es Supervisor (id_rol=1), cargar datos de supervisor
+          else if (user.idRol == 1 && user.idEmpresa != null) {
+            print(
+              '[HomeScreen] 🔍 Usuario es SUPERVISOR, obteniendo SupervisorProvider...',
+            );
+            final supervisorProvider = Provider.of<SupervisorProvider>(
+              context,
+              listen: false,
+            );
+            print(
+              '[HomeScreen] 📞 Cargando datos del supervisor (empresa: ${user.idEmpresa})...',
+            );
+            // Cargar empresas clientes
+            supervisorProvider.cargarEmpresasClientes();
+            // Cargar solicitudes de pago
+            supervisorProvider.cargarSolicitudesPago(user.idEmpresa!);
+            // Cargar auditorías activas (estado 1 o 2)
+            supervisorProvider.cargarAuditorias(user.idEmpresa!);
+          }
           // TODO: Agregar carga de datos para Cliente (id_rol=3)
         } else {
           print('[HomeScreen] ⚠️ Usuario NULL o sin idUsuario');

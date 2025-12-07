@@ -4,6 +4,7 @@ import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 import 'package:audit_cloud_app/screens/all_audits/all_audits_screen.dart';
 import 'package:audit_cloud_app/screens/evidences/evidences_screen.dart';
+import 'package:audit_cloud_app/screens/client_companies/client_companies_screen.dart';
 
 /// Modelo para definir un item del navigation bar
 class NavItem {
@@ -207,6 +208,19 @@ class CustomBottomNavigationBar extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const EvidencesScreen(),
+                ),
+              );
+            } else {
+              // Para otros casos, usar el callback original
+              onTap(index);
+            }
+          } else if (userRole == 1) {
+            // Navegación especial para Supervisor
+            if (navItem.route == '/empresas-cliente') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ClientCompaniesScreen(),
                 ),
               );
             } else {

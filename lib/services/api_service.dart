@@ -278,6 +278,95 @@ class ApiService {
   }
 
   // ============================================================================
+  // MÉTODOS PARA SUPERVISOR
+  // ============================================================================
+
+  /// Obtiene las empresas clientes que tienen auditorías con la empresa del supervisor
+  /// GET /api/supervisor/clientes-con-auditorias
+  static Future<List<Map<String, dynamic>>?> getEmpresasClientes() async {
+    try {
+      final response = await get(
+        '/supervisor/clientes-con-auditorias',
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List<dynamic>;
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        print(
+          '[ApiService] Error al obtener empresas clientes: ${response.statusCode}',
+        );
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en getEmpresasClientes: $e');
+      return null;
+    }
+  }
+
+  /// Obtiene las solicitudes de pago de una empresa
+  /// GET /api/supervisor/solicitudes-pago/:idEmpresa
+  static Future<List<Map<String, dynamic>>?> getSolicitudesPago(
+    int idEmpresa,
+  ) async {
+    try {
+      final response = await get(
+        '/supervisor/solicitudes-pago/$idEmpresa',
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+        // La respuesta viene con estructura: {total, page, limit, data}
+        final data = responseData['data'] as List<dynamic>;
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        print(
+          '[ApiService] Error al obtener solicitudes de pago: ${response.statusCode}',
+        );
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en getSolicitudesPago: $e');
+      return null;
+    }
+  }
+
+  /// Obtiene las auditorías de una empresa auditora (para Supervisor)
+  /// GET /api/supervisor/auditorias/:idEmpresa
+  /// Parámetros opcionales:
+  /// - idEstado: Filtrar por estado
+  static Future<List<Map<String, dynamic>>?> getAuditoriasSupervisor(
+    int idEmpresa, {
+    int? idEstado,
+  }) async {
+    try {
+      String endpoint = '/supervisor/auditorias/$idEmpresa';
+      if (idEstado != null) {
+        endpoint += '?id_estado=$idEstado';
+      }
+
+      final response = await get(endpoint, requiresAuth: true);
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+        // La respuesta viene con estructura: {total, page, limit, data}
+        final data = responseData['data'] as List<dynamic>;
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        print(
+          '[ApiService] Error al obtener auditorías del supervisor: ${response.statusCode}',
+        );
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en getAuditoriasSupervisor: $e');
+      return null;
+    }
+  }
+
+  // ============================================================================
   // MÉTODOS FUTUROS PARA OTRAS ENTIDADES
   // ============================================================================
 
