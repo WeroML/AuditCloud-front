@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:audit_cloud_app/data/models/user_model.dart';
 import 'package:audit_cloud_app/data/repositories/auth_repository.dart';
+import 'package:audit_cloud_app/services/api_service.dart';
 
 /// Provider que maneja el estado de autenticación
 /// Notifica a la UI sobre cambios en el estado del usuario
@@ -81,8 +82,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Realiza el login con Google Sign-In
-  /// Retorna true si el login fue exitoso, false en caso contrario
-  Future<bool> loginWithGoogle() async {
+  /// Retorna:
+  /// - true: Login exitoso y completo
+  /// - false: Login cancelado o error
+  /// - null: Requiere completar información de empresa
+  Future<bool?> loginWithGoogle() async {
     print('[AuthProvider] Iniciando loginWithGoogle...');
     _setLoading(true);
     try {
@@ -95,6 +99,14 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
+        // Verificar si hay token (significa que se requiere completar perfil)
+        final token = await ApiService.getToken();
+        if (token != null) {
+          print(
+            '[AuthProvider] ⚠️ Login con Google requiere completar información',
+          );
+          return null; // Indica que se debe mostrar formulario de empresa
+        }
         // Login cancelado o falló
         print('[AuthProvider] Login cancelado o falló (user es null)');
         return false;
@@ -105,6 +117,114 @@ class AuthProvider extends ChangeNotifier {
       return false;
     } finally {
       print('[AuthProvider] Finalizando login, isLoading = false');
+      _setLoading(false);
+    }
+  }
+
+  /// Realizar registro tradicional con nombre, correo y contraseña
+  /// Llama al backend POST /api/cliente/registro
+  Future<AuthResult> signupWithCredentials({
+    required String nombre,
+    required String email,
+    required String password,
+    required String nombreEmpresa,
+    String? ciudad,
+    String? estado,
+    String? rfc,
+  }) async {
+    print('[AuthProvider] Iniciando signupWithCredentials...');
+    _setLoading(true);
+
+    try {
+      // Llamar al repository para registrar en el backend
+      final result = await _authRepository.signUpWithCredentials(
+        nombre: nombre,
+        email: email,
+        password: password,
+        nombreEmpresa: nombreEmpresa,
+        ciudad: ciudad,
+        estado: estado,
+        rfc: rfc,
+      );
+
+      if (result.success && result.user != null) {
+        print('[AuthProvider] ✅ Registro exitoso para: ${result.user!.correo}');
+        _currentUser = result.user;
+        notifyListeners();
+        return result;
+      } else {
+        print('[AuthProvider] ❌ Registro falló');
+        return result;
+      }
+    } catch (error) {
+      print('[AuthProvider] ❌ Error en signupWithCredentials: $error');
+      return AuthResult(
+        success: false,
+        message: 'Error inesperado. Intenta nuevamente.',
+      );
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Completa el perfil de un usuario autenticado con Google
+  /// Envía la información de la empresa al backend
+  Future<bool> completeGoogleProfile({
+    required String nombreEmpresa,
+    required String ciudad,
+    required String estado,
+    String? rfc,
+  }) async {
+    print('[AuthProvider] Completando perfil de Google...');
+    _setLoading(true);
+    try {
+      final success = await _authRepository.completeGoogleProfile(
+        nombreEmpresa: nombreEmpresa,
+        ciudad: ciudad,
+        estado: estado,
+        rfc: rfc,
+      );
+
+      if (success) {
+        // Refrescar datos del usuario
+        await _checkCurrentUser();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      print('[AuthProvider] ❌ Error en completeGoogleProfile: $error');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Realizar registro con Google Sign-In
+  /// El backend creará automáticamente el usuario si no existe
+  Future<AuthResult> signupWithGoogle() async {
+    print('[AuthProvider] Iniciando signupWithGoogle...');
+    _setLoading(true);
+    try {
+      // Delegar autenticación al repository
+      final result = await _authRepository.signUpWithGoogle();
+
+      if (result.success && result.user != null) {
+        print('[AuthProvider] ✅ Registro exitoso para: ${result.user!.correo}');
+        _currentUser = result.user;
+        notifyListeners();
+        return result;
+      } else {
+        print('[AuthProvider] Registro cancelado o falló');
+        return result;
+      }
+    } catch (error) {
+      print('[AuthProvider] ❌ Error en signupWithGoogle: $error');
+      return AuthResult(
+        success: false,
+        message: 'Error inesperado. Intenta nuevamente.',
+      );
+    } finally {
+      print('[AuthProvider] Finalizando registro, isLoading = false');
       _setLoading(false);
     }
   }

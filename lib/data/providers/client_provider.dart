@@ -290,18 +290,33 @@ class ClienteProvider extends ChangeNotifier {
 
   /// Refresca las auditorías
   Future<void> refrescarAuditorias(int idCliente) async {
+    if (_isLoadingAuditorias) {
+      print('[ClienteProvider] ⚠️ Ya hay una carga de auditorías en progreso');
+      return;
+    }
     print('[ClienteProvider] Refrescando auditorías...');
     await cargarAuditorias(idCliente);
   }
 
   /// Refresca las solicitudes de pago
   Future<void> refrescarSolicitudesPago(int idCliente) async {
+    if (_isLoadingSolicitudes) {
+      print('[ClienteProvider] ⚠️ Ya hay una carga de solicitudes en progreso');
+      return;
+    }
     print('[ClienteProvider] Refrescando solicitudes de pago...');
     await cargarSolicitudesPago(idCliente);
   }
 
   /// Refresca las empresas auditoras
   Future<void> refrescarEmpresasAuditoras() async {
+    // Prevenir múltiples cargas simultáneas
+    if (_isLoadingEmpresas) {
+      print(
+        '[ClienteProvider] ⚠️ Ya hay una carga en progreso, ignorando petición duplicada',
+      );
+      return;
+    }
     print('[ClienteProvider] Refrescando empresas auditoras...');
     await cargarEmpresasAuditoras();
   }

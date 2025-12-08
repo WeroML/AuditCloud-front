@@ -25,15 +25,28 @@ class _HomeScreenAppbarState extends State<HomeScreenAppbar> {
       title: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
-              color: Color(AppColors.primaryGreen).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF9C85EF), // Morado claro
+                  Color(0xFF5E35B1), // Morado oscuro
+                ],
+              ),
             ),
-            child: Icon(
-              Icons.eco,
-              color: Color(AppColors.primaryGreen),
-              size: 24,
+            child: const Center(
+              child: Text(
+                'A',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 12),

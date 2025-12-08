@@ -31,26 +31,26 @@ class _EvidencesScreenState extends State<EvidencesScreen> {
 
         if (user != null) {
           if (user.idRol == 2) {
-            // Auditor: cargar evidencias del auditor
+            // Auditor: refrescar evidencias del auditor
             print(
-              '[EvidencesScreen] 👤 Usuario Auditor, cargando evidencias...',
+              '[EvidencesScreen] 👤 Usuario Auditor, refrescando evidencias...',
             );
             final auditorProvider = Provider.of<AuditorProvider>(
               context,
               listen: false,
             );
-            // Cargar todas las evidencias del auditor (idAuditoria = 0)
-            auditorProvider.cargarEvidencias(idAuditoria: 0);
+            // Refrescar todas las evidencias del auditor (idAuditoria = 0)
+            auditorProvider.refrescarEvidencias(idAuditoria: 0);
           } else if (user.idRol == 1) {
-            // Supervisor: cargar evidencias de todas las auditorías
+            // Supervisor: refrescar evidencias de todas las auditorías
             print(
-              '[EvidencesScreen] 👔 Usuario Supervisor, cargando evidencias...',
+              '[EvidencesScreen] 👔 Usuario Supervisor, refrescando evidencias...',
             );
             final supervisorProvider = Provider.of<SupervisorProvider>(
               context,
               listen: false,
             );
-            supervisorProvider.cargarEvidencias();
+            supervisorProvider.refrescarEvidencias();
           }
         }
       } catch (e, stackTrace) {

@@ -151,6 +151,12 @@ class AuditorProvider extends ChangeNotifier {
 
   /// Refresca las auditorías asignadas
   Future<void> refrescarAuditorias(int idAuditor) async {
+    if (_isLoading) {
+      print(
+        '[AuditorProvider] ⚠️ Ya hay una carga de auditorías en progreso, ignorando petición duplicada',
+      );
+      return;
+    }
     print('[AuditorProvider] Refrescando auditorías...');
     await cargarAuditoriasAsignadas(idAuditor);
   }
@@ -251,6 +257,12 @@ class AuditorProvider extends ChangeNotifier {
 
   /// Refresca las evidencias
   Future<void> refrescarEvidencias({int idAuditoria = 0}) async {
+    if (_isLoadingEvidencias) {
+      print(
+        '[AuditorProvider] ⚠️ Ya hay una carga de evidencias en progreso, ignorando petición duplicada',
+      );
+      return;
+    }
     print('[AuditorProvider] Refrescando evidencias...');
     await cargarEvidencias(idAuditoria: idAuditoria);
   }

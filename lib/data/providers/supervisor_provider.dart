@@ -394,30 +394,56 @@ class SupervisorProvider extends ChangeNotifier {
 
   /// Refresca todas las empresas clientes
   Future<void> refrescarEmpresasClientes() async {
+    if (_isLoadingEmpresas) {
+      print('[SupervisorProvider] ⚠️ Ya hay una carga de empresas en progreso');
+      return;
+    }
     print('[SupervisorProvider] Refrescando empresas clientes...');
     await cargarEmpresasClientes();
   }
 
   /// Refresca las solicitudes de pago
   Future<void> refrescarSolicitudesPago(int idEmpresa) async {
+    if (_isLoadingSolicitudes) {
+      print(
+        '[SupervisorProvider] ⚠️ Ya hay una carga de solicitudes en progreso',
+      );
+      return;
+    }
     print('[SupervisorProvider] Refrescando solicitudes de pago...');
     await cargarSolicitudesPago(idEmpresa);
   }
 
   /// Refresca las auditorías
   Future<void> refrescarAuditorias(int idEmpresa, {int? idEstado}) async {
+    if (_isLoadingAuditorias) {
+      print(
+        '[SupervisorProvider] ⚠️ Ya hay una carga de auditorías en progreso',
+      );
+      return;
+    }
     print('[SupervisorProvider] Refrescando auditorías...');
     await cargarAuditorias(idEmpresa, idEstado: idEstado);
   }
 
   /// Refresca las evidencias
   Future<void> refrescarEvidencias() async {
+    if (_isLoadingEvidencias) {
+      print(
+        '[SupervisorProvider] ⚠️ Ya hay una carga de evidencias en progreso',
+      );
+      return;
+    }
     print('[SupervisorProvider] Refrescando evidencias...');
     await cargarEvidencias();
   }
 
   /// Refresca los usuarios internos
   Future<void> refrescarUsuariosInternos(int idEmpresa) async {
+    if (_isLoadingUsuarios) {
+      print('[SupervisorProvider] ⚠️ Ya hay una carga de usuarios en progreso');
+      return;
+    }
     print('[SupervisorProvider] Refrescando usuarios internos...');
     await cargarUsuariosInternos(idEmpresa);
   }
@@ -476,6 +502,10 @@ class SupervisorProvider extends ChangeNotifier {
 
   /// Refresca los reportes
   Future<void> refrescarReportes() async {
+    if (_isLoadingReportes) {
+      print('[SupervisorProvider] ⚠️ Ya hay una carga de reportes en progreso');
+      return;
+    }
     print('[SupervisorProvider] Refrescando reportes...');
     await cargarReportes();
   }

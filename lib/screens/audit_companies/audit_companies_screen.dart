@@ -29,9 +29,9 @@ class _AuditCompaniesScreenState extends State<AuditCompaniesScreen> {
           listen: false,
         );
         print(
-          '[AuditCompaniesScreen] 📞 Llamando a cargarEmpresasAuditoras()...',
+          '[AuditCompaniesScreen] 📞 Llamando a refrescarEmpresasAuditoras()...',
         );
-        clienteProvider.cargarEmpresasAuditoras();
+        clienteProvider.refrescarEmpresasAuditoras();
       } catch (e, stackTrace) {
         print('[AuditCompaniesScreen] ❌ ERROR en PostFrameCallback: $e');
         print('[AuditCompaniesScreen] 📍 Stack trace: $stackTrace');

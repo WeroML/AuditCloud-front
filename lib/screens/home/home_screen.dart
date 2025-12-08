@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (user != null && user.idUsuario != null) {
           print('[HomeScreen] ✅ Usuario válido con id: ${user.idUsuario}');
 
-          // Si el usuario es Auditor (id_rol=2), cargar auditorías asignadas
+          // Si el usuario es Auditor (id_rol=2), refrescar auditorías asignadas
           if (user.idRol == 2) {
             print(
               '[HomeScreen] 🔍 Usuario es AUDITOR, obteniendo AuditorProvider...',
@@ -53,11 +53,11 @@ class _HomeScreenState extends State<HomeScreen> {
               listen: false,
             );
             print(
-              '[HomeScreen] 📞 Llamando a cargarAuditoriasAsignadas(${user.idUsuario})...',
+              '[HomeScreen] 📞 Llamando a refrescarAuditorias(${user.idUsuario})...',
             );
-            auditorProvider.cargarAuditoriasAsignadas(user.idUsuario!);
+            auditorProvider.refrescarAuditorias(user.idUsuario!);
           }
-          // Si el usuario es Supervisor (id_rol=1), cargar datos de supervisor
+          // Si el usuario es Supervisor (id_rol=1), refrescar datos de supervisor
           else if (user.idRol == 1 && user.idEmpresa != null) {
             print(
               '[HomeScreen] 🔍 Usuario es SUPERVISOR, obteniendo SupervisorProvider...',
@@ -67,16 +67,16 @@ class _HomeScreenState extends State<HomeScreen> {
               listen: false,
             );
             print(
-              '[HomeScreen] 📞 Cargando datos del supervisor (empresa: ${user.idEmpresa})...',
+              '[HomeScreen] 📞 Refrescando datos del supervisor (empresa: ${user.idEmpresa})...',
             );
-            // Cargar empresas clientes
-            supervisorProvider.cargarEmpresasClientes();
-            // Cargar solicitudes de pago
-            supervisorProvider.cargarSolicitudesPago(user.idEmpresa!);
-            // Cargar auditorías activas (estado 1 o 2)
-            supervisorProvider.cargarAuditorias(user.idEmpresa!);
+            // Refrescar empresas clientes
+            supervisorProvider.refrescarEmpresasClientes();
+            // Refrescar solicitudes de pago
+            supervisorProvider.refrescarSolicitudesPago(user.idEmpresa!);
+            // Refrescar auditorías activas
+            supervisorProvider.refrescarAuditorias(user.idEmpresa!);
           }
-          // Si el usuario es Cliente (id_rol=3), cargar datos del cliente
+          // Si el usuario es Cliente (id_rol=3), refrescar datos del cliente
           else if (user.idRol == 3 && user.idUsuario != null) {
             print(
               '[HomeScreen] 🔍 Usuario es CLIENTE, obteniendo ClienteProvider...',
@@ -86,14 +86,14 @@ class _HomeScreenState extends State<HomeScreen> {
               listen: false,
             );
             print(
-              '[HomeScreen] 📞 Cargando datos del cliente (id: ${user.idUsuario})...',
+              '[HomeScreen] 📞 Refrescando datos del cliente (id: ${user.idUsuario})...',
             );
-            // Cargar auditorías del cliente
-            clienteProvider.cargarAuditorias(user.idUsuario!);
-            // Cargar solicitudes de pago del cliente
-            clienteProvider.cargarSolicitudesPago(user.idUsuario!);
-            // Cargar empresas auditoras disponibles
-            clienteProvider.cargarEmpresasAuditoras();
+            // Refrescar auditorías del cliente
+            clienteProvider.refrescarAuditorias(user.idUsuario!);
+            // Refrescar solicitudes de pago del cliente
+            clienteProvider.refrescarSolicitudesPago(user.idUsuario!);
+            // Refrescar empresas auditoras disponibles
+            clienteProvider.refrescarEmpresasAuditoras();
           }
         } else {
           print('[HomeScreen] ⚠️ Usuario NULL o sin idUsuario');

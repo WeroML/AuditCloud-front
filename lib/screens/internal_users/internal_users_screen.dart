@@ -28,7 +28,7 @@ class _InternalUsersScreenState extends State<InternalUsersScreen> {
           context,
           listen: false,
         );
-        supervisorProvider.cargarUsuariosInternos(user.idEmpresa!);
+        supervisorProvider.refrescarUsuariosInternos(user.idEmpresa!);
       }
     });
   }

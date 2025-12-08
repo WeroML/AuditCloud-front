@@ -32,7 +32,7 @@ class _AllAuditsScreenState extends State<AllAuditsScreen> {
             context,
             listen: false,
           );
-          auditorProvider.cargarAuditoriasAsignadas(user.idUsuario!);
+          auditorProvider.refrescarAuditorias(user.idUsuario!);
         } else if (user.idRol == 1 && user.idEmpresa != null) {
           // Supervisor: recargar auditorías de la empresa
           final supervisorProvider = Provider.of<SupervisorProvider>(

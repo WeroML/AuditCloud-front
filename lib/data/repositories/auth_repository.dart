@@ -2,6 +2,21 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:audit_cloud_app/data/models/user_model.dart';
 import 'package:audit_cloud_app/services/api_service.dart';
 
+/// Resultado de una operación de autenticación
+class AuthResult {
+  final bool success;
+  final UserModel? user;
+  final String? message;
+  final bool requireCompanyInfo;
+
+  AuthResult({
+    required this.success,
+    this.user,
+    this.message,
+    this.requireCompanyInfo = false,
+  });
+}
+
 /// Repository que maneja toda la lógica de autenticación
 /// No depende de Provider ni de la capa de UI
 /// Preparado para integración futura con backend y NFS/HDFS
@@ -48,6 +63,70 @@ class AuthRepository {
     } catch (e) {
       print('[AuthRepository] ❌ Error en login: $e');
       return null;
+    }
+  }
+
+  /// Registro tradicional con nombre, correo y contraseña
+  /// Llama al endpoint POST /api/cliente/registro del backend
+  Future<AuthResult> signUpWithCredentials({
+    required String nombre,
+    required String email,
+    required String password,
+    required String nombreEmpresa,
+    String? ciudad,
+    String? estado,
+    String? rfc,
+  }) async {
+    print('[AuthRepository] Iniciando registro con credenciales...');
+    print('[AuthRepository] Email: $email');
+    print('[AuthRepository] Nombre: $nombre');
+    print('[AuthRepository] Empresa: $nombreEmpresa');
+
+    try {
+      // Llamar al endpoint de registro del backend
+      final responseData = await ApiService.signup(
+        nombre: nombre,
+        correo: email,
+        password: password,
+        nombreEmpresa: nombreEmpresa,
+        ciudad: ciudad,
+        estado: estado,
+        rfc: rfc,
+      );
+
+      if (responseData == null) {
+        print('[AuthRepository] ❌ Registro falló - respuesta null');
+        return AuthResult(
+          success: false,
+          message: 'Error en el registro. Intenta nuevamente.',
+        );
+      }
+
+      print('[AuthRepository] ✅ Registro exitoso');
+      print('[AuthRepository] Token guardado en ApiService');
+
+      // Extraer datos del usuario de la respuesta
+      final usuarioData = responseData['usuario'] as Map<String, dynamic>;
+
+      // Crear el UserModel desde la respuesta del backend
+      final user = UserModel(
+        idUsuario: usuarioData['id_usuario'] as int,
+        idEmpresa: usuarioData['id_empresa'] as int?,
+        nombre: usuarioData['nombre'] as String,
+        correo: usuarioData['correo'] as String,
+        idRol: usuarioData['id_rol'] as int?,
+        activo: true,
+        photoUrl: usuarioData['foto_url'] as String?,
+      );
+
+      print('[AuthRepository] UserModel creado: ${user.nombre}');
+      return AuthResult(success: true, user: user);
+    } catch (e) {
+      print('[AuthRepository] ❌ Error en registro: $e');
+      return AuthResult(
+        success: false,
+        message: 'Error de conexión. Verifica tu internet.',
+      );
     }
   }
 
@@ -122,11 +201,20 @@ class AuthRepository {
       );
 
       // Autenticar con el backend enviando el idToken
-      // Por defecto, el rol es 3 (CLIENTE) si no se especifica
-      final responseData = await ApiService.loginWithGoogle(idToken, rol: 3);
+      final responseData = await ApiService.loginWithGoogle(idToken);
 
       if (responseData == null) {
         print('[AuthRepository] ❌ Login con Google falló en el backend');
+        return null;
+      }
+
+      // Verificar si se requiere completar información de empresa
+      if (responseData['require_company_info'] == true) {
+        print(
+          '[AuthRepository] ⚠️ Se requiere completar información de empresa',
+        );
+        // Retornar null para que el provider sepa que debe mostrar el formulario
+        // El token ya está guardado, pero el usuario no está completo
         return null;
       }
 
@@ -146,6 +234,112 @@ class AuthRepository {
       print('[AuthRepository] ❌ Error en Google Sign-In: $error');
       print('[AuthRepository] Stack trace: ${StackTrace.current}');
       return null;
+    }
+  }
+
+  /// Realiza el registro con Google Sign-In
+  /// Similar a signInWithGoogle pero para propósitos de registro
+  /// El backend creará automáticamente el usuario si no existe
+  Future<AuthResult> signUpWithGoogle() async {
+    print('[AuthRepository] Iniciando Google Sign-Up...');
+    try {
+      // Iniciar el flujo de autenticación de Google
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // El usuario canceló el registro
+        print('[AuthRepository] Registro cancelado por el usuario');
+        return AuthResult(success: false, message: 'Registro cancelado');
+      }
+
+      print('[AuthRepository] Usuario de Google obtenido: ${googleUser.email}');
+
+      // Obtener la autenticación de Google para obtener el idToken
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        print('[AuthRepository] ❌ No se pudo obtener el idToken de Google');
+        return AuthResult(
+          success: false,
+          message: 'Error en la autenticación con Google',
+        );
+      }
+
+      print(
+        '[AuthRepository] idToken obtenido exitosamente, registrando en backend...',
+      );
+
+      // Registrar en el backend enviando el idToken
+      // El backend creará el usuario automáticamente si no existe
+      final responseData = await ApiService.loginWithGoogle(idToken);
+
+      if (responseData == null) {
+        print('[AuthRepository] ❌ Registro con Google falló en el backend');
+        return AuthResult(
+          success: false,
+          message: 'Error en el registro. Intenta nuevamente.',
+        );
+      }
+
+      // Verificar si se requiere completar información de empresa
+      if (responseData['require_company_info'] == true) {
+        print(
+          '[AuthRepository] ⚠️ Usuario creado, requiere completar información de empresa',
+        );
+        return AuthResult(
+          success: true,
+          requireCompanyInfo: true,
+          message: 'Completa la información de tu empresa',
+        );
+      }
+
+      print('[AuthRepository] ✅ Registro con Google exitoso');
+
+      // Extraer datos del usuario de la respuesta
+      final usuarioData = responseData['usuario'] as Map<String, dynamic>;
+      final user = UserModel.fromJson(usuarioData);
+
+      print('[AuthRepository] UserModel creado: ${user.nombre}');
+      return AuthResult(success: true, user: user);
+    } catch (error) {
+      print('[AuthRepository] ❌ Error en Google Sign-Up: $error');
+      return AuthResult(
+        success: false,
+        message: 'Error de conexión. Verifica tu internet.',
+      );
+    }
+  }
+
+  /// Completa el perfil de un usuario autenticado con Google
+  /// Envía la información de la empresa al backend
+  Future<bool> completeGoogleProfile({
+    required String nombreEmpresa,
+    required String ciudad,
+    required String estado,
+    String? rfc,
+  }) async {
+    print('[AuthRepository] Completando perfil de Google...');
+    try {
+      final responseData = await ApiService.completeProfile(
+        nombreEmpresa: nombreEmpresa,
+        ciudad: ciudad,
+        estado: estado,
+        rfc: rfc,
+      );
+
+      if (responseData != null) {
+        print('[AuthRepository] ✅ Perfil completado exitosamente');
+        return true;
+      } else {
+        print('[AuthRepository] ❌ Error al completar perfil');
+        return false;
+      }
+    } catch (e) {
+      print('[AuthRepository] ❌ Error en completeGoogleProfile: $e');
+      return false;
     }
   }
 
@@ -216,7 +410,7 @@ class AuthRepository {
       }
 
       // Reautenticar con el backend para obtener datos actualizados
-      final responseData = await ApiService.loginWithGoogle(idToken, rol: 3);
+      final responseData = await ApiService.loginWithGoogle(idToken);
 
       if (responseData != null && responseData['usuario'] != null) {
         final usuarioData = responseData['usuario'] as Map<String, dynamic>;

@@ -10,7 +10,7 @@ class ApiService {
   // - iOS Simulator: 'http://localhost:3000/api' o 'http://127.0.0.1:3000/api'
   // - Dispositivo físico: 'http://<TU_IP_LOCAL>:3000/api' (ejemplo: 'http://192.168.1.100:3000/api')
   // TODO: Cambiar esta URL por la URL real del backend cuando esté desplegado
-  static const String baseUrl = 'http://10.0.2.2:3000/api';
+  static const String baseUrl = 'http://10.187.164.6/api';
 
   // Headers base para todas las peticiones
   static Map<String, String> get _baseHeaders => {
@@ -196,14 +196,11 @@ class ApiService {
 
   /// Login con Google
   /// POST /api/auth/google
-  /// Envía el idToken de Google y opcionalmente el rol deseado
+  /// Envía el token de Google
   /// Retorna los datos del usuario y el token JWT del backend
-  static Future<Map<String, dynamic>?> loginWithGoogle(
-    String idToken, {
-    int? rol, // rol opcional: 1=SUPERVISOR, 2=AUDITOR, 3=CLIENTE (default)
-  }) async {
+  static Future<Map<String, dynamic>?> loginWithGoogle(String idToken) async {
     try {
-      final body = {'idToken': idToken, if (rol != null) 'rol': rol};
+      final body = {'token': idToken};
 
       final response = await post('/auth/google', body, requiresAuth: false);
 
@@ -223,6 +220,79 @@ class ApiService {
       }
     } catch (e) {
       print('[ApiService] ❌ Error en loginWithGoogle: $e');
+      return null;
+    }
+  }
+
+  /// Registro tradicional de cliente con datos de empresa
+  /// POST /api/cliente/registro
+  static Future<Map<String, dynamic>?> signup({
+    required String nombre,
+    required String correo,
+    required String password,
+    required String nombreEmpresa,
+    String? ciudad,
+    String? estado,
+    String? rfc,
+  }) async {
+    try {
+      final response = await post('/cliente/registro', {
+        'nombre': nombre,
+        'correo': correo,
+        'password': password,
+        'nombre_empresa': nombreEmpresa,
+        if (ciudad != null) 'ciudad': ciudad,
+        if (estado != null) 'estado': estado,
+        if (rfc != null) 'rfc': rfc,
+      }, requiresAuth: false);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+        // Guardar el token JWT
+        if (data['token'] != null) {
+          await saveToken(data['token'] as String);
+        }
+
+        return data;
+      } else {
+        print('[ApiService] Registro falló: ${response.statusCode}');
+        print('[ApiService] Error: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en signup: $e');
+      return null;
+    }
+  }
+
+  /// Completar perfil de usuario Google con información de empresa
+  /// POST /api/auth/complete-profile
+  static Future<Map<String, dynamic>?> completeProfile({
+    required String nombreEmpresa,
+    required String ciudad,
+    required String estado,
+    String? rfc,
+  }) async {
+    try {
+      final response = await post('/auth/complete-profile', {
+        'nombre_empresa': nombreEmpresa,
+        'ciudad': ciudad,
+        'estado': estado,
+        if (rfc != null) 'rfc': rfc,
+      }, requiresAuth: true);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        print('[ApiService] ✅ Perfil completado exitosamente');
+        return data;
+      } else {
+        print('[ApiService] ❌ Complete profile falló: ${response.statusCode}');
+        print('[ApiService] Response: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en completeProfile: $e');
       return null;
     }
   }
@@ -498,10 +568,20 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body) as Map<String, dynamic>;
-        // La respuesta viene con estructura: {total, page, limit, data}
-        final data = responseData['data'] as List<dynamic>;
-        return data.cast<Map<String, dynamic>>();
+        final responseData = jsonDecode(response.body);
+
+        // El backend puede devolver [] directamente o {total, page, limit, data}
+        if (responseData is List) {
+          // Respuesta vacía o directa como array
+          return responseData.cast<Map<String, dynamic>>();
+        } else if (responseData is Map<String, dynamic>) {
+          // Respuesta con estructura paginada
+          final data = responseData['data'] as List<dynamic>;
+          return data.cast<Map<String, dynamic>>();
+        } else {
+          print('[ApiService] Formato de respuesta inesperado');
+          return null;
+        }
       } else {
         print(
           '[ApiService] Error al obtener auditorías del cliente: ${response.statusCode}',

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/screens/home/home_screen.dart';
+import 'package:audit_cloud_app/screens/signup/signup_screen.dart';
+import 'package:audit_cloud_app/screens/signup/google_profile_completion_screen.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -73,17 +75,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
     print('[LoginScreen] Llamando a authProvider.loginWithGoogle()');
     // Llamar al provider para hacer login con Google
-    final bool success = await authProvider.loginWithGoogle();
+    final bool? result = await authProvider.loginWithGoogle();
 
-    print('[LoginScreen] Resultado del login: $success');
-    if (success && mounted) {
+    print('[LoginScreen] Resultado del login: $result');
+    if (result == true && mounted) {
       // Login exitoso, navegar a HomeScreen
       print('[LoginScreen] Navegando a HomeScreen...');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
-    } else if (!success && mounted) {
+    } else if (result == null && mounted) {
+      // Requiere completar información de empresa
+      print('[LoginScreen] Navegando a GoogleProfileCompletionScreen...');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const GoogleProfileCompletionScreen(),
+        ),
+      );
+    } else if (result == false && mounted) {
       // Mostrar mensaje de error o que se canceló
       print('[LoginScreen] Mostrando SnackBar de error');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -110,15 +121,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     // Logo y título
                     Container(
-                      padding: const EdgeInsets.all(20),
+                      width: 100,
+                      height: 100,
                       decoration: BoxDecoration(
-                        color: Color(AppColors.primaryGreen).withOpacity(0.1),
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color.fromARGB(255, 109, 174, 216), // Morado claro
+                            Color.fromARGB(255, 57, 53, 177), // Morado oscuro
+                          ],
+                        ),
                       ),
-                      child: Icon(
-                        Icons.eco,
-                        color: Color(AppColors.primaryGreen),
-                        size: 60,
+                      child: const Center(
+                        child: Text(
+                          'A',
+                          style: TextStyle(
+                            fontSize: 60,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -440,7 +464,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: authProvider.isLoading
                               ? null
                               : () {
-                                  // TODO: Navegar a pantalla de registro
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const SignupScreen(),
+                                    ),
+                                  );
                                 },
                           child: Text(
                             'Regístrate',
