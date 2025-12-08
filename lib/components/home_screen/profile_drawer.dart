@@ -9,6 +9,7 @@ import 'package:audit_cloud_app/screens/client_companies/client_companies_screen
 import 'package:audit_cloud_app/screens/payments/payments_screen.dart';
 import 'package:audit_cloud_app/screens/internal_users/internal_users_screen.dart';
 import 'package:audit_cloud_app/screens/audit_companies/audit_companies_screen.dart';
+import 'package:audit_cloud_app/screens/reports/reports_screen.dart';
 
 /// Modelo para definir un item del drawer
 class DrawerMenuItem {
@@ -111,12 +112,6 @@ class ProfileDrawer extends StatelessWidget {
             activeIcon: Icons.photo_library,
             title: 'Evidencias',
             route: '/evidencias',
-          ),
-          DrawerMenuItem(
-            icon: Icons.description_outlined,
-            activeIcon: Icons.description,
-            title: 'Reportes',
-            route: '/reportes',
           ),
         ];
 
@@ -317,6 +312,13 @@ class ProfileDrawer extends StatelessWidget {
                                   MaterialPageRoute(
                                     builder: (context) =>
                                         const InternalUsersScreen(),
+                                  ),
+                                );
+                              } else if (item.route == '/reportes') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ReportsScreen(),
                                   ),
                                 );
                               } else {

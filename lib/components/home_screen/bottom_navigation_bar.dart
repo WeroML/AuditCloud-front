@@ -84,12 +84,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
             label: 'Evidencias',
             route: '/evidencias',
           ),
-          NavItem(
-            icon: Icons.description_outlined,
-            activeIcon: Icons.description,
-            label: 'Reportes',
-            route: '/reportes',
-          ),
         ];
 
       case 3: // CLIENTE

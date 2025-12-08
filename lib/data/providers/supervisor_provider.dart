@@ -25,6 +25,10 @@ class SupervisorProvider extends ChangeNotifier {
   List<Map<String, dynamic>> _usuariosInternos = [];
   List<Map<String, dynamic>> get usuariosInternos => _usuariosInternos;
 
+  // Lista de reportes finales
+  List<Map<String, dynamic>> _reportes = [];
+  List<Map<String, dynamic>> get reportes => _reportes;
+
   // Estado de carga
   bool _isLoadingEmpresas = false;
   bool get isLoadingEmpresas => _isLoadingEmpresas;
@@ -40,6 +44,9 @@ class SupervisorProvider extends ChangeNotifier {
 
   bool _isLoadingUsuarios = false;
   bool get isLoadingUsuarios => _isLoadingUsuarios;
+
+  bool _isLoadingReportes = false;
+  bool get isLoadingReportes => _isLoadingReportes;
 
   // Estado de error
   String? _errorMessage;
@@ -97,6 +104,17 @@ class SupervisorProvider extends ChangeNotifier {
   /// Usuarios activos (activo = true)
   int get usuariosActivos =>
       _usuariosInternos.where((u) => u['activo'] == true).length;
+
+  /// Total de reportes
+  int get totalReportes => _reportes.length;
+
+  /// Reportes de tipo FINAL
+  int get reportesFinales =>
+      _reportes.where((r) => r['tipo'] == 'FINAL').length;
+
+  /// Reportes con archivo adjunto
+  int get reportesConArchivo =>
+      _reportes.where((r) => r['url'] != null && r['url'] != '').length;
 
   // ============================================================================
   // MÉTODOS PRINCIPALES - EMPRESAS CLIENTES
@@ -404,6 +422,90 @@ class SupervisorProvider extends ChangeNotifier {
     await cargarUsuariosInternos(idEmpresa);
   }
 
+  // ============================================================================
+  // MÉTODOS PRINCIPALES - REPORTES
+  // ============================================================================
+
+  /// Carga los reportes finales de todas las auditorías del supervisor
+  /// GET /api/supervisor/auditorias/:id/reporte-final (para cada auditoría)
+  Future<void> cargarReportes() async {
+    print('[SupervisorProvider] 🔄 Iniciando carga de reportes finales...');
+
+    _isLoadingReportes = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      // Recopilar reportes de todas las auditorías
+      List<Map<String, dynamic>> todosLosReportes = [];
+
+      for (final auditoria in _auditorias) {
+        final idAuditoria = auditoria.idAuditoria;
+        if (idAuditoria == null) continue;
+
+        print(
+          '[SupervisorProvider] 📡 Cargando reporte de auditoría $idAuditoria...',
+        );
+        final reporteData = await ApiService.getReporteFinal(idAuditoria);
+
+        if (reporteData != null) {
+          todosLosReportes.add(reporteData);
+        } else {
+          print(
+            '[SupervisorProvider] ⚠️ No hay reporte final para auditoría $idAuditoria',
+          );
+        }
+      }
+
+      _reportes = todosLosReportes;
+      print('[SupervisorProvider] ✅ ${_reportes.length} reportes cargados');
+      print(
+        '[SupervisorProvider] 📊 Finales: $reportesFinales, Con Archivo: $reportesConArchivo',
+      );
+      print("[SupervisorProvider] 📊 Info de los reportes: $_reportes");
+    } catch (error, stackTrace) {
+      _errorMessage = 'Error de conexión: $error';
+      print('[SupervisorProvider] ❌ EXCEPCIÓN CAPTURADA: $error');
+      print('[SupervisorProvider] 📍 Stack trace: $stackTrace');
+    } finally {
+      print('[SupervisorProvider] ⏹️ Finalizando carga de reportes');
+      _isLoadingReportes = false;
+      notifyListeners();
+    }
+  }
+
+  /// Refresca los reportes
+  Future<void> refrescarReportes() async {
+    print('[SupervisorProvider] Refrescando reportes...');
+    await cargarReportes();
+  }
+
+  /// Obtiene reportes ordenados por fecha de creación (más recientes primero)
+  List<Map<String, dynamic>> getReportesOrdenados() {
+    final lista = List<Map<String, dynamic>>.from(_reportes);
+    lista.sort((a, b) {
+      final fechaA = a['fecha_creacion'] as String?;
+      final fechaB = b['fecha_creacion'] as String?;
+
+      if (fechaA == null && fechaB == null) return 0;
+      if (fechaA == null) return 1;
+      if (fechaB == null) return -1;
+
+      try {
+        final dateA = DateTime.parse(fechaA);
+        final dateB = DateTime.parse(fechaB);
+        return dateB.compareTo(dateA);
+      } catch (e) {
+        return 0;
+      }
+    });
+    return lista;
+  }
+
+  // ============================================================================
+  // MÉTODOS AUXILIARES
+  // ============================================================================
+
   /// Obtiene usuarios ordenados por nombre
   List<Map<String, dynamic>> getUsuariosOrdenados() {
     final lista = List<Map<String, dynamic>>.from(_usuariosInternos);
@@ -478,12 +580,14 @@ class SupervisorProvider extends ChangeNotifier {
     _auditorias = [];
     _evidencias = [];
     _usuariosInternos = [];
+    _reportes = [];
     _errorMessage = null;
     _isLoadingEmpresas = false;
     _isLoadingSolicitudes = false;
     _isLoadingAuditorias = false;
     _isLoadingEvidencias = false;
     _isLoadingUsuarios = false;
+    _isLoadingReportes = false;
     notifyListeners();
   }
 

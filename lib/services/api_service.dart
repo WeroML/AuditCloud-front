@@ -453,6 +453,35 @@ class ApiService {
     }
   }
 
+  /// Obtiene el reporte final de una auditoría
+  /// GET /api/supervisor/auditorias/:id/reporte-final
+  static Future<Map<String, dynamic>?> getReporteFinal(int idAuditoria) async {
+    try {
+      final response = await get(
+        '/supervisor/auditorias/$idAuditoria/reporte-final',
+        requiresAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      } else if (response.statusCode == 404) {
+        // No existe reporte final para esta auditoría
+        print(
+          '[ApiService] No existe reporte final para auditoría: $idAuditoria',
+        );
+        return null;
+      } else {
+        print(
+          '[ApiService] Error al obtener reporte final: ${response.statusCode}',
+        );
+        return null;
+      }
+    } catch (e) {
+      print('[ApiService] ❌ Error en getReporteFinal: $e');
+      return null;
+    }
+  }
+
   // ============================================================================
   // MÉTODOS PARA CLIENTE
   // ============================================================================
