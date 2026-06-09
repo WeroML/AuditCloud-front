@@ -23,10 +23,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -65,5 +62,15 @@ class DefaultFirebaseOptions {
     messagingSenderId: '417831327586',
     projectId: 'auditcloud-45700',
     storageBucket: 'auditcloud-45700.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDgTqwBGSuJH3xk0SHvP-nW7rgk1pnh_SY',
+    appId: '1:417831327586:ios:675efb909851e90b2ebe3b',
+    messagingSenderId: '417831327586',
+    projectId: 'auditcloud-45700',
+    storageBucket: 'auditcloud-45700.firebasestorage.app',
+    androidClientId: '417831327586-5654negl342set1e9t3nirf0aco564uk.apps.googleusercontent.com',
+    iosBundleId: 'com.example.auditCloudApp',
   );
 }
