@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
 import 'package:audit_cloud_app/screens/home/home_screen.dart';
+import 'package:audit_cloud_app/screens/login/login_screen.dart';
 import 'package:audit_cloud_app/data/providers/auth_provider.dart';
 
 class GoogleProfileCompletionScreen extends StatefulWidget {
@@ -48,7 +50,7 @@ class _GoogleProfileCompletionScreenState
     if (success && mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        CupertinoPageRoute(builder: (context) => const HomeScreen()),
       );
     } else if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -66,6 +68,25 @@ class _GoogleProfileCompletionScreenState
 
     return Scaffold(
       backgroundColor: Color(AppColors.backgroundColor),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Color(AppColors.textPrimary),
+          ),
+          onPressed: () async {
+            await authProvider.logout();
+            if (mounted) {
+              Navigator.pushReplacement(
+                context,
+                CupertinoPageRoute(builder: (context) => const LoginScreen()),
+              );
+            }
+          },
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

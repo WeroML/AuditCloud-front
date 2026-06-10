@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
@@ -253,7 +254,7 @@ class ProfileDrawer extends StatelessWidget {
                               if (item.route == '/mis-auditorias') {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  CupertinoPageRoute(
                                     builder: (context) =>
                                         const AllAuditsScreen(),
                                   ),
@@ -261,7 +262,7 @@ class ProfileDrawer extends StatelessWidget {
                               } else if (item.route == '/evidencias') {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  CupertinoPageRoute(
                                     builder: (context) =>
                                         const EvidencesScreen(),
                                   ),
@@ -277,7 +278,7 @@ class ProfileDrawer extends StatelessWidget {
                               if (item.route == '/empresas-cliente') {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  CupertinoPageRoute(
                                     builder: (context) =>
                                         const ClientCompaniesScreen(),
                                   ),
@@ -285,7 +286,7 @@ class ProfileDrawer extends StatelessWidget {
                               } else if (item.route == '/auditorias') {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  CupertinoPageRoute(
                                     builder: (context) =>
                                         const AllAuditsScreen(),
                                   ),
@@ -293,7 +294,7 @@ class ProfileDrawer extends StatelessWidget {
                               } else if (item.route == '/pagos') {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  CupertinoPageRoute(
                                     builder: (context) =>
                                         const PaymentsScreen(),
                                   ),
@@ -301,7 +302,7 @@ class ProfileDrawer extends StatelessWidget {
                               } else if (item.route == '/evidencias') {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  CupertinoPageRoute(
                                     builder: (context) =>
                                         const EvidencesScreen(),
                                   ),
@@ -309,7 +310,7 @@ class ProfileDrawer extends StatelessWidget {
                               } else if (item.route == '/usuarios-internos') {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  CupertinoPageRoute(
                                     builder: (context) =>
                                         const InternalUsersScreen(),
                                   ),
@@ -317,7 +318,7 @@ class ProfileDrawer extends StatelessWidget {
                               } else if (item.route == '/reportes') {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  CupertinoPageRoute(
                                     builder: (context) => const ReportsScreen(),
                                   ),
                                 );
@@ -332,7 +333,7 @@ class ProfileDrawer extends StatelessWidget {
                               if (item.route == '/empresas-auditoras') {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  CupertinoPageRoute(
                                     builder: (context) =>
                                         const AuditCompaniesScreen(),
                                   ),
@@ -340,7 +341,7 @@ class ProfileDrawer extends StatelessWidget {
                               } else if (item.route == '/pagos') {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  CupertinoPageRoute(
                                     builder: (context) =>
                                         const PaymentsScreen(),
                                   ),
@@ -348,7 +349,7 @@ class ProfileDrawer extends StatelessWidget {
                               } else if (item.route == '/mis-auditorias') {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  CupertinoPageRoute(
                                     builder: (context) =>
                                         const AllAuditsScreen(),
                                   ),
@@ -408,7 +409,7 @@ class ProfileDrawer extends StatelessWidget {
                       if (context.mounted) {
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(
+                          CupertinoPageRoute(
                             builder: (context) => const LoginScreen(),
                           ),
                           (route) => false,

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
@@ -104,7 +105,7 @@ class _SignupScreenState extends State<SignupScreen> {
       print('[SignupScreen] Navegando a HomeScreen...');
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        CupertinoPageRoute(builder: (context) => const HomeScreen()),
       );
     } else if (!result.success && mounted) {
       // Mostrar mensaje de error
@@ -132,7 +133,7 @@ class _SignupScreenState extends State<SignupScreen> {
       print('[SignupScreen] Navegando a GoogleProfileCompletionScreen...');
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
+        CupertinoPageRoute(
           builder: (context) => const GoogleProfileCompletionScreen(),
         ),
       );
@@ -141,7 +142,7 @@ class _SignupScreenState extends State<SignupScreen> {
       print('[SignupScreen] Navegando a HomeScreen...');
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        CupertinoPageRoute(builder: (context) => const HomeScreen()),
       );
     } else if (!result.success && mounted) {
       // Mostrar mensaje de error

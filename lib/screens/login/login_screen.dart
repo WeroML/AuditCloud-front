@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
@@ -54,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
       print('[LoginScreen] Navegando a HomeScreen...');
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        CupertinoPageRoute(builder: (context) => const HomeScreen()),
       );
     } else if (!success && mounted) {
       // Mostrar mensaje de error
@@ -83,14 +84,14 @@ class _LoginScreenState extends State<LoginScreen> {
       print('[LoginScreen] Navegando a HomeScreen...');
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        CupertinoPageRoute(builder: (context) => const HomeScreen()),
       );
     } else if (result == null && mounted) {
       // Requiere completar información de empresa
       print('[LoginScreen] Navegando a GoogleProfileCompletionScreen...');
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
+        CupertinoPageRoute(
           builder: (context) => const GoogleProfileCompletionScreen(),
         ),
       );
@@ -466,7 +467,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               : () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(
+                                    CupertinoPageRoute(
                                       builder: (context) =>
                                           const SignupScreen(),
                                     ),

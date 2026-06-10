@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:audit_cloud_app/core/colors.dart';
@@ -195,14 +196,14 @@ class CustomBottomNavigationBar extends StatelessWidget {
             if (navItem.route == '/mis-auditorias') {
               Navigator.push(
                 context,
-                MaterialPageRoute(
+                CupertinoPageRoute(
                   builder: (context) => const AllAuditsScreen(),
                 ),
               );
             } else if (navItem.route == '/evidencias') {
               Navigator.push(
                 context,
-                MaterialPageRoute(
+                CupertinoPageRoute(
                   builder: (context) => const EvidencesScreen(),
                 ),
               );
@@ -215,21 +216,23 @@ class CustomBottomNavigationBar extends StatelessWidget {
             if (navItem.route == '/empresas-cliente') {
               Navigator.push(
                 context,
-                MaterialPageRoute(
+                CupertinoPageRoute(
                   builder: (context) => const ClientCompaniesScreen(),
                 ),
               );
             } else if (navItem.route == '/auditorias') {
               Navigator.push(
                 context,
-                MaterialPageRoute(
+                CupertinoPageRoute(
                   builder: (context) => const AllAuditsScreen(),
                 ),
               );
             } else if (navItem.route == '/pagos') {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const PaymentsScreen()),
+                CupertinoPageRoute(
+                  builder: (context) => const PaymentsScreen(),
+                ),
               );
             } else {
               // Para otros casos, usar el callback original
@@ -240,19 +243,21 @@ class CustomBottomNavigationBar extends StatelessWidget {
             if (navItem.route == '/empresas-auditoras') {
               Navigator.push(
                 context,
-                MaterialPageRoute(
+                CupertinoPageRoute(
                   builder: (context) => const AuditCompaniesScreen(),
                 ),
               );
             } else if (navItem.route == '/pagos') {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const PaymentsScreen()),
+                CupertinoPageRoute(
+                  builder: (context) => const PaymentsScreen(),
+                ),
               );
             } else if (navItem.route == '/mis-auditorias') {
               Navigator.push(
                 context,
-                MaterialPageRoute(
+                CupertinoPageRoute(
                   builder: (context) => const AllAuditsScreen(),
                 ),
               );

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:audit_cloud_app/components/home_screen/home_screen_appbar.dart';
 import 'package:audit_cloud_app/components/home_screen/role_statistics_cards.dart';
 import 'package:audit_cloud_app/components/home_screen/audit_status_chart.dart';
@@ -118,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // Navegar a total de auditorías
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const AllAuditsScreen()),
+          CupertinoPageRoute(builder: (context) => const AllAuditsScreen()),
         ).then((_) {
           // Restaurar el índice a Home cuando regrese
           setState(() {
