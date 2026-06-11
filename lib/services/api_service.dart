@@ -10,7 +10,7 @@ class ApiService {
   // - iOS Simulator: 'http://localhost:3000/api' o 'http://127.0.0.1:3000/api'
   // - Dispositivo físico: 'http://<TU_IP_LOCAL>:3000/api' (ejemplo: 'http://192.168.1.100:3000/api')
   // TODO: Cambiar esta URL por la URL real del backend cuando esté desplegado
-  static const String baseUrl = 'http://localhost:3000/api';
+  static const String baseUrl = 'http://192.168.30.1:3000/api';
 
   // Headers base para todas las peticiones
   static Map<String, String> get _baseHeaders => {
