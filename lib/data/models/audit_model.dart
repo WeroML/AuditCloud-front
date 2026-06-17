@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de auditoría basado en auditorias.json del backend
 class AuditModel {
   final int? idAuditoria;
@@ -55,8 +57,8 @@ class AuditModel {
 
     if (json['cliente'] != null && json['cliente'] is Map<String, dynamic>) {
       final clienteData = json['cliente'] as Map<String, dynamic>;
-      clienteNombre = clienteData['nombre'] as String?;
-      clienteEmpresa = clienteData['nombre_empresa'] as String?;
+      clienteNombre = SafeParser.parseStringNullable(clienteData, 'nombre');
+      clienteEmpresa = SafeParser.parseStringNullable(clienteData, 'nombre_empresa');
     }
 
     // Extraer información de empresa auditora si está presente (para Cliente)
@@ -64,24 +66,30 @@ class AuditModel {
     if (json['empresa_auditora'] != null &&
         json['empresa_auditora'] is Map<String, dynamic>) {
       final empresaData = json['empresa_auditora'] as Map<String, dynamic>;
-      empresaAuditoraNombre = empresaData['nombre'] as String?;
+      empresaAuditoraNombre = SafeParser.parseStringNullable(empresaData, 'nombre');
+    }
+
+    // También verificamos objeto 'empresa' que suele mandar el backend
+    if (json['empresa'] != null && json['empresa'] is Map<String, dynamic>) {
+      final empresaData = json['empresa'] as Map<String, dynamic>;
+      empresaAuditoraNombre ??= SafeParser.parseStringNullable(empresaData, 'nombre');
     }
 
     return AuditModel(
-      idAuditoria: json['id_auditoria'] as int?,
-      idEmpresaAuditora: json['id_empresa_auditora'] as int,
-      idCliente: json['id_cliente'] as int,
-      idSolicitudPago: json['id_solicitud_pago'] as int?,
-      idEstado: json['id_estado'] as int? ?? 1,
-      monto: json['monto'] != null ? (json['monto'] as num).toDouble() : null,
+      idAuditoria: SafeParser.parseIntNullable(json, 'id_auditoria'),
+      idEmpresaAuditora: SafeParser.parseIntFromMultiplePaths(json, ['id_empresa_auditora', 'empresa.id_empresa', 'empresa_auditora.id_empresa']),
+      idCliente: SafeParser.parseIntFromMultiplePaths(json, ['id_cliente', 'cliente.id_usuario', 'cliente.id_empresa']),
+      idSolicitudPago: SafeParser.parseIntNullable(json, 'id_solicitud_pago'),
+      idEstado: SafeParser.parseInt(json, 'id_estado', defaultValue: 1),
+      monto: SafeParser.parseDoubleNullable(json, 'monto'),
       fechaInicio: json['fecha_inicio'] != null
-          ? DateTime.parse(json['fecha_inicio'] as String)
+          ? DateTime.tryParse(json['fecha_inicio'].toString())
           : null,
       creadaEn: json['creada_en'] != null
-          ? DateTime.parse(json['creada_en'] as String)
+          ? DateTime.tryParse(json['creada_en'].toString())
           : null,
       estadoActualizadoEn: json['estado_actualizado_en'] != null
-          ? DateTime.parse(json['estado_actualizado_en'] as String)
+          ? DateTime.tryParse(json['estado_actualizado_en'].toString())
           : null,
       clienteNombre: clienteNombre,
       clienteEmpresa: clienteEmpresa,

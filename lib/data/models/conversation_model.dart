@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de conversación basado en conversaciones.json del backend
 class ConversationModel {
   final int? idConversacion;
@@ -31,14 +33,14 @@ class ConversationModel {
   /// Crea una instancia desde JSON del backend
   factory ConversationModel.fromJson(Map<String, dynamic> json) {
     return ConversationModel(
-      idConversacion: json['id_conversacion'] as int?,
-      idCliente: json['id_cliente'] as int,
-      idEmpresaAuditora: json['id_empresa_auditora'] as int,
-      asunto: json['asunto'] as String,
+      idConversacion: SafeParser.parseIntNullable(json, 'id_conversacion'),
+      idCliente: SafeParser.parseIntFromMultiplePaths(json, ['id_cliente', 'cliente.id_usuario', 'cliente.id_empresa']),
+      idEmpresaAuditora: SafeParser.parseIntFromMultiplePaths(json, ['id_empresa_auditora', 'empresa.id_empresa', 'empresa_auditora.id_empresa']),
+      asunto: SafeParser.parseString(json, 'asunto'),
       creadoEn: json['creado_en'] != null
-          ? DateTime.parse(json['creado_en'] as String)
+          ? DateTime.tryParse(json['creado_en'].toString())
           : null,
-      activo: json['activo'] as bool? ?? true,
+      activo: SafeParser.parseBool(json, 'activo', defaultValue: true),
     );
   }
 

@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de estado de auditoría basado en estados_auditoria.json del backend
 class AuditStatusModel {
   final int idEstado;
@@ -18,9 +20,9 @@ class AuditStatusModel {
   /// Crea una instancia desde JSON del backend
   factory AuditStatusModel.fromJson(Map<String, dynamic> json) {
     return AuditStatusModel(
-      idEstado: json['id_estado'] as int,
-      clave: json['clave'] as String,
-      nombre: json['nombre'] as String,
+      idEstado: SafeParser.parseInt(json, 'id_estado'),
+      clave: SafeParser.parseString(json, 'clave'),
+      nombre: SafeParser.parseString(json, 'nombre'),
     );
   }
 

@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de solicitud de pago basado en solicitudes_pago.json del backend
 class PaymentRequestModel {
   final int? idSolicitud;
@@ -40,18 +42,18 @@ class PaymentRequestModel {
   /// Crea una instancia desde JSON del backend
   factory PaymentRequestModel.fromJson(Map<String, dynamic> json) {
     return PaymentRequestModel(
-      idSolicitud: json['id_solicitud'] as int?,
-      idEmpresa: json['id_empresa'] as int,
-      idEmpresaAuditora: json['id_empresa_auditora'] as int,
-      idCliente: json['id_cliente'] as int,
-      monto: (json['monto'] as num).toDouble(),
-      concepto: json['concepto'] as String,
-      idEstado: json['id_estado'] as int? ?? 1,
+      idSolicitud: SafeParser.parseIntNullable(json, 'id_solicitud'),
+      idEmpresa: SafeParser.parseIntFromMultiplePaths(json, ['id_empresa', 'empresa.id_empresa', 'id_empresa_auditora']),
+      idEmpresaAuditora: SafeParser.parseIntFromMultiplePaths(json, ['id_empresa_auditora', 'empresa_auditora.id_empresa', 'empresa.id_empresa']),
+      idCliente: SafeParser.parseIntFromMultiplePaths(json, ['id_cliente', 'cliente.id_usuario', 'cliente.id_empresa']),
+      monto: SafeParser.parseDouble(json, 'monto'),
+      concepto: SafeParser.parseString(json, 'concepto'),
+      idEstado: SafeParser.parseInt(json, 'id_estado', defaultValue: 1),
       creadoEn: json['creado_en'] != null
-          ? DateTime.parse(json['creado_en'] as String)
+          ? DateTime.tryParse(json['creado_en'].toString())
           : null,
       pagadaEn: json['pagada_en'] != null
-          ? DateTime.parse(json['pagada_en'] as String)
+          ? DateTime.tryParse(json['pagada_en'].toString())
           : null,
     );
   }

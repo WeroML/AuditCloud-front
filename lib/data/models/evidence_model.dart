@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de evidencia basado en evidencias.json del backend
 class EvidenceModel {
   final int? idEvidencia;
@@ -51,17 +53,17 @@ class EvidenceModel {
   /// Crea una instancia desde JSON del backend
   factory EvidenceModel.fromJson(Map<String, dynamic> json) {
     return EvidenceModel(
-      idEvidencia: json['id_evidencia'] as int?,
-      idAuditoria: json['id_auditoria'] as int,
-      idModulo: json['id_modulo'] as int,
-      idAuditor: json['id_auditor'] as int,
-      tipo: json['tipo'] as String,
-      url: json['url'] as String,
-      nombreArchivo: json['nombre_archivo'] as String,
-      descripcion: json['descripcion'] as String,
-      ubicacion: json['ubicacion'] as String?,
+      idEvidencia: SafeParser.parseIntNullable(json, 'id_evidencia'),
+      idAuditoria: SafeParser.parseIntFromMultiplePaths(json, ['id_auditoria', 'auditoria.id_auditoria']),
+      idModulo: SafeParser.parseInt(json, 'id_modulo'),
+      idAuditor: SafeParser.parseIntFromMultiplePaths(json, ['id_auditor', 'auditor.id_usuario']),
+      tipo: SafeParser.parseString(json, 'tipo'),
+      url: SafeParser.parseString(json, 'url'),
+      nombreArchivo: SafeParser.parseString(json, 'nombre_archivo'),
+      descripcion: SafeParser.parseString(json, 'descripcion'),
+      ubicacion: SafeParser.parseStringNullable(json, 'ubicacion'),
       creadoEn: json['creado_en'] != null
-          ? DateTime.parse(json['creado_en'] as String)
+          ? DateTime.tryParse(json['creado_en'].toString())
           : null,
     );
   }

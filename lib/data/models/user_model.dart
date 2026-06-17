@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de usuario basado en usuarios.json del backend
 class UserModel {
   final int? idUsuario;
@@ -47,20 +49,23 @@ class UserModel {
 
   /// Crea una instancia desde JSON del backend
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    int? idEmpresa = SafeParser.parseIntFromMultiplePaths(json, ['id_empresa', 'empresa.id_empresa']);
+    if (idEmpresa == 0) idEmpresa = null; // Si no hay y devuelve 0, lo hacemos null para mantener coherencia
+    
     return UserModel(
-      idUsuario: json['id_usuario'] as int?,
-      idEmpresa: json['id_empresa'] as int?,
-      nombre: json['nombre'] as String,
-      correo: json['correo'] as String,
-      passwordHash: json['password_hash'] as String?,
-      idRol: json['id_rol'] as int?,
-      activo: json['activo'] as bool? ?? true,
+      idUsuario: SafeParser.parseIntNullable(json, 'id_usuario'),
+      idEmpresa: idEmpresa,
+      nombre: SafeParser.parseString(json, 'nombre'),
+      correo: SafeParser.parseString(json, 'correo'),
+      passwordHash: SafeParser.parseStringNullable(json, 'password_hash'),
+      idRol: SafeParser.parseIntNullable(json, 'id_rol'),
+      activo: SafeParser.parseBool(json, 'activo', defaultValue: true),
       creadoEn: json['creado_en'] != null
-          ? DateTime.parse(json['creado_en'] as String)
+          ? DateTime.tryParse(json['creado_en'].toString())
           : null,
-      photoUrl: json['foto_url'] as String?,
-      googleId: json['google_id'] as String?,
-      loginGoogle: json['login_google'] as bool?,
+      photoUrl: SafeParser.parseStringNullable(json, 'foto_url'),
+      googleId: SafeParser.parseStringNullable(json, 'google_id'),
+      loginGoogle: SafeParser.parseBoolNullable(json, 'login_google'),
     );
   }
 

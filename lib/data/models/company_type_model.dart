@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de tipo de empresa basado en tipos_empresa.json del backend
 class CompanyTypeModel {
   final int idTipoEmpresa;
@@ -18,9 +20,9 @@ class CompanyTypeModel {
   /// Crea una instancia desde JSON del backend
   factory CompanyTypeModel.fromJson(Map<String, dynamic> json) {
     return CompanyTypeModel(
-      idTipoEmpresa: json['id_tipo_empresa'] as int,
-      clave: json['clave'] as String,
-      nombre: json['nombre'] as String,
+      idTipoEmpresa: SafeParser.parseInt(json, 'id_tipo_empresa'),
+      clave: SafeParser.parseString(json, 'clave'),
+      nombre: SafeParser.parseString(json, 'nombre'),
     );
   }
 

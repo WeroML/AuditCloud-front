@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de estado de solicitud de pago basado en estados_solicitud_pago.json del backend
 class PaymentRequestStatusModel {
   final int idEstado;
@@ -18,9 +20,9 @@ class PaymentRequestStatusModel {
   /// Crea una instancia desde JSON del backend
   factory PaymentRequestStatusModel.fromJson(Map<String, dynamic> json) {
     return PaymentRequestStatusModel(
-      idEstado: json['id_estado'] as int,
-      clave: json['clave'] as String,
-      nombre: json['nombre'] as String,
+      idEstado: SafeParser.parseInt(json, 'id_estado'),
+      clave: SafeParser.parseString(json, 'clave'),
+      nombre: SafeParser.parseString(json, 'nombre'),
     );
   }
 

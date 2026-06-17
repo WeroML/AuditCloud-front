@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de mensaje basado en mensajes.json del backend
 class MessageModel {
   final int? idMensaje;
@@ -31,13 +33,13 @@ class MessageModel {
   /// Crea una instancia desde JSON del backend
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
-      idMensaje: json['id_mensaje'] as int?,
-      idConversacion: json['id_conversacion'] as int,
-      emisorTipo: json['emisor_tipo'] as String,
-      emisorId: json['emisor_id'] as int,
-      contenido: json['contenido'] as String,
+      idMensaje: SafeParser.parseIntNullable(json, 'id_mensaje'),
+      idConversacion: SafeParser.parseInt(json, 'id_conversacion'),
+      emisorTipo: SafeParser.parseString(json, 'emisor_tipo'),
+      emisorId: SafeParser.parseIntFromMultiplePaths(json, ['emisor_id', 'emisor.id_usuario']),
+      contenido: SafeParser.parseString(json, 'contenido'),
       creadoEn: json['creado_en'] != null
-          ? DateTime.parse(json['creado_en'] as String)
+          ? DateTime.tryParse(json['creado_en'].toString())
           : null,
     );
   }

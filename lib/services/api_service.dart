@@ -409,13 +409,12 @@ class ApiService {
   }
 
   /// Obtiene las solicitudes de pago de una empresa
-  /// GET /api/supervisor/solicitudes-pago/:idEmpresa
-  static Future<List<Map<String, dynamic>>?> getSolicitudesPago(
-    int idEmpresa,
-  ) async {
+  /// GET /api/supervisor/solicitudes-pago
+  static Future<List<Map<String, dynamic>>?> getSolicitudesPago() async {
     try {
+      // Quitamos el /$idEmpresa de la ruta
       final response = await get(
-        '/supervisor/solicitudes-pago/$idEmpresa',
+        '/supervisor/solicitudes-pago',
         requiresAuth: true,
       );
 

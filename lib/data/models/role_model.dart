@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de rol de usuario basado en roles.json del backend
 class RoleModel {
   final int idRol;
@@ -14,9 +16,9 @@ class RoleModel {
   /// Crea una instancia desde JSON del backend
   factory RoleModel.fromJson(Map<String, dynamic> json) {
     return RoleModel(
-      idRol: json['id_rol'] as int,
-      clave: json['clave'] as String,
-      nombre: json['nombre'] as String,
+      idRol: SafeParser.parseInt(json, 'id_rol'),
+      clave: SafeParser.parseString(json, 'clave'),
+      nombre: SafeParser.parseString(json, 'nombre'),
     );
   }
 

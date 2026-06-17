@@ -177,7 +177,7 @@ class SupervisorProvider extends ChangeNotifier {
       print(
         '[SupervisorProvider] 📡 Llamando a ApiService.getSolicitudesPago...',
       );
-      final solicitudesData = await ApiService.getSolicitudesPago(idEmpresa);
+      final solicitudesData = await ApiService.getSolicitudesPago();
       print(
         '[SupervisorProvider] 📥 Respuesta recibida: ${solicitudesData != null ? "Datos OK" : "NULL"}',
       );

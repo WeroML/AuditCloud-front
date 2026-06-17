@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de reporte basado en reportes.json del backend
 class ReportModel {
   final int? idReporte;
@@ -28,13 +30,13 @@ class ReportModel {
   /// Crea una instancia desde JSON del backend
   factory ReportModel.fromJson(Map<String, dynamic> json) {
     return ReportModel(
-      idReporte: json['id_reporte'] as int?,
-      idAuditoria: json['id_auditoria'] as int,
-      urlPdf: json['url_pdf'] as String,
+      idReporte: SafeParser.parseIntNullable(json, 'id_reporte'),
+      idAuditoria: SafeParser.parseIntFromMultiplePaths(json, ['id_auditoria', 'auditoria.id_auditoria']),
+      urlPdf: SafeParser.parseString(json, 'url_pdf'),
       fechaGeneracion: json['fecha_generacion'] != null
-          ? DateTime.parse(json['fecha_generacion'] as String)
+          ? DateTime.tryParse(json['fecha_generacion'].toString())
           : null,
-      estado: json['estado'] as String? ?? 'BORRADOR',
+      estado: SafeParser.parseString(json, 'estado', defaultValue: 'BORRADOR'),
     );
   }
 

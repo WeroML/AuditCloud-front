@@ -100,49 +100,13 @@ class ClienteProvider extends ChangeNotifier {
           '[ClienteProvider] 🔄 Convirtiendo ${auditoriasData.length} registros a AuditModel...',
         );
 
-        // Primero, obtener los IDs únicos de empresas auditoras
-        final empresasIds = auditoriasData
-            .map((a) => a['id_empresa_auditora'] as int)
-            .toSet()
-            .toList();
-
-        print('[ClienteProvider] 📋 Empresas auditoras únicas: $empresasIds');
-
-        // Cargar nombres de empresas auditoras
-        final Map<int, String> empresasNombres = {};
-        for (final idEmpresa in empresasIds) {
-          try {
-            final detalle = await ApiService.getDetalleEmpresaAuditora(
-              idEmpresa,
-            );
-            if (detalle != null && detalle['nombre'] != null) {
-              empresasNombres[idEmpresa] = detalle['nombre'] as String;
-              print(
-                '[ClienteProvider] ✅ Empresa $idEmpresa: ${detalle['nombre']}',
-              );
-            }
-          } catch (e) {
-            print(
-              '[ClienteProvider] ⚠️ No se pudo obtener nombre de empresa $idEmpresa: $e',
-            );
-          }
-        }
-
         _auditorias = auditoriasData.map((json) {
           print(
             '[ClienteProvider] 📝 Procesando auditoría: ${json['id_auditoria']}',
           );
           print('[ClienteProvider] 📊 Datos: $json');
           try {
-            final auditoria = AuditModel.fromJson(json);
-
-            // Enriquecer con nombre de empresa auditora
-            final nombreEmpresa = empresasNombres[auditoria.idEmpresaAuditora];
-            if (nombreEmpresa != null) {
-              return auditoria.copyWith(empresaAuditoraNombre: nombreEmpresa);
-            }
-
-            return auditoria;
+            return AuditModel.fromJson(json);
           } catch (e) {
             print(
               '[ClienteProvider] ❌ Error al parsear auditoría ${json['id_auditoria']}: $e',
@@ -245,26 +209,8 @@ class ClienteProvider extends ChangeNotifier {
       );
 
       if (empresasData != null) {
-        // Cargar detalles de cada empresa para obtener módulos completos
-        print(
-          '[ClienteProvider] 🔄 Cargando detalles de ${empresasData.length} empresas...',
-        );
-        _empresasAuditoras = [];
-
-        for (var empresa in empresasData) {
-          final idEmpresa = empresa['id_empresa'] as int;
-          print(
-            '[ClienteProvider] 📡 Obteniendo detalle de empresa $idEmpresa...',
-          );
-
-          final detalle = await ApiService.getDetalleEmpresaAuditora(idEmpresa);
-          if (detalle != null) {
-            _empresasAuditoras.add(detalle);
-          } else {
-            // Si falla el detalle, usar la info básica sin módulos_detalle
-            _empresasAuditoras.add(empresa);
-          }
-        }
+        // Asignamos directamente la respuesta general sin hacer llamadas individuales
+        _empresasAuditoras = List<Map<String, dynamic>>.from(empresasData);
 
         print(
           '[ClienteProvider] ✅ ${_empresasAuditoras.length} empresas auditoras cargadas',

@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de relación empresa-módulo basado en empresa_modulos.json del backend
 class CompanyModuleModel {
   final int? idEmpresaModulo;
@@ -25,11 +27,11 @@ class CompanyModuleModel {
   /// Crea una instancia desde JSON del backend
   factory CompanyModuleModel.fromJson(Map<String, dynamic> json) {
     return CompanyModuleModel(
-      idEmpresaModulo: json['id_empresa_modulo'] as int?,
-      idEmpresa: json['id_empresa'] as int,
-      idModulo: json['id_modulo'] as int,
+      idEmpresaModulo: SafeParser.parseIntNullable(json, 'id_empresa_modulo'),
+      idEmpresa: SafeParser.parseInt(json, 'id_empresa'),
+      idModulo: SafeParser.parseInt(json, 'id_modulo'),
       registradoEn: json['registrado_en'] != null
-          ? DateTime.parse(json['registrado_en'] as String)
+          ? DateTime.tryParse(json['registrado_en'].toString())
           : null,
     );
   }

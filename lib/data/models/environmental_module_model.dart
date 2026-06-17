@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de módulo ambiental basado en modulos_ambientales.json del backend
 class EnvironmentalModuleModel {
   final int idModulo;
@@ -18,9 +20,9 @@ class EnvironmentalModuleModel {
   /// Crea una instancia desde JSON del backend
   factory EnvironmentalModuleModel.fromJson(Map<String, dynamic> json) {
     return EnvironmentalModuleModel(
-      idModulo: json['id_modulo'] as int,
-      clave: json['clave'] as String,
-      nombre: json['nombre'] as String,
+      idModulo: SafeParser.parseInt(json, 'id_modulo'),
+      clave: SafeParser.parseString(json, 'clave'),
+      nombre: SafeParser.parseString(json, 'nombre'),
     );
   }
 

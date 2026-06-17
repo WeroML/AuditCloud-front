@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de relación auditoría-módulo basado en auditoria_modulos.json del backend
 class AuditModuleModel {
   final int? idAuditoriaModulo;
@@ -25,11 +27,11 @@ class AuditModuleModel {
   /// Crea una instancia desde JSON del backend
   factory AuditModuleModel.fromJson(Map<String, dynamic> json) {
     return AuditModuleModel(
-      idAuditoriaModulo: json['id_auditoria_modulo'] as int?,
-      idAuditoria: json['id_auditoria'] as int,
-      idModulo: json['id_modulo'] as int,
+      idAuditoriaModulo: SafeParser.parseIntNullable(json, 'id_auditoria_modulo'),
+      idAuditoria: SafeParser.parseInt(json, 'id_auditoria'),
+      idModulo: SafeParser.parseInt(json, 'id_modulo'),
       registradoEn: json['registrado_en'] != null
-          ? DateTime.parse(json['registrado_en'] as String)
+          ? DateTime.tryParse(json['registrado_en'].toString())
           : null,
     );
   }

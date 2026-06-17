@@ -1,3 +1,5 @@
+import '../../core/utils/safe_parser.dart';
+
 /// Modelo de empresa basado en empresas.json del backend
 class CompanyModel {
   final int? idEmpresa;
@@ -52,19 +54,19 @@ class CompanyModel {
   /// Crea una instancia desde JSON del backend
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
     return CompanyModel(
-      idEmpresa: json['id_empresa'] as int?,
-      idTipoEmpresa: json['id_tipo_empresa'] as int,
-      nombre: json['nombre'] as String,
-      rfc: json['rfc'] as String?,
-      giro: json['giro'] as String?,
-      direccion: json['direccion'] as String?,
-      ciudad: json['ciudad'] as String?,
-      estado: json['estado'] as String?,
-      pais: json['pais'] as String? ?? 'México',
-      contactoNombre: json['contacto_nombre'] as String,
-      contactoCorreo: json['contacto_correo'] as String,
-      contactoTelefono: json['contacto_telefono'] as String?,
-      activo: json['activo'] as bool? ?? true,
+      idEmpresa: SafeParser.parseIntNullable(json, 'id_empresa'),
+      idTipoEmpresa: SafeParser.parseInt(json, 'id_tipo_empresa'),
+      nombre: SafeParser.parseString(json, 'nombre'),
+      rfc: SafeParser.parseStringNullable(json, 'rfc'),
+      giro: SafeParser.parseStringNullable(json, 'giro'),
+      direccion: SafeParser.parseStringNullable(json, 'direccion'),
+      ciudad: SafeParser.parseStringNullable(json, 'ciudad'),
+      estado: SafeParser.parseStringNullable(json, 'estado'),
+      pais: SafeParser.parseString(json, 'pais', defaultValue: 'México'),
+      contactoNombre: SafeParser.parseString(json, 'contacto_nombre'),
+      contactoCorreo: SafeParser.parseString(json, 'contacto_correo'),
+      contactoTelefono: SafeParser.parseStringNullable(json, 'contacto_telefono'),
+      activo: SafeParser.parseBool(json, 'activo', defaultValue: true),
     );
   }
 
