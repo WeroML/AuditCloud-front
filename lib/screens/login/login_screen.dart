@@ -299,6 +299,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 12),
 
+                          /*
                           // Olvidé mi contraseña
                           Align(
                             alignment: Alignment.centerRight,
@@ -318,6 +319,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
+                          */
                           const SizedBox(height: 24),
 
                           // Botón de login tradicional
