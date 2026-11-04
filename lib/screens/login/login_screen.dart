@@ -148,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Audit Cloud',
+                      'AuditCloud',
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,

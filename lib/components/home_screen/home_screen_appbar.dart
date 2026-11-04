@@ -51,7 +51,7 @@ class _HomeScreenAppbarState extends State<HomeScreenAppbar> {
           ),
           const SizedBox(width: 12),
           Text(
-            'Audit Cloud',
+            'AuditCloud',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,

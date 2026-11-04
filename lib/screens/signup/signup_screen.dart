@@ -197,7 +197,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Audit Cloud',
+                      'AuditCloud',
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
